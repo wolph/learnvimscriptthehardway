@@ -43,38 +43,38 @@ DB="$CONTENTS_DIR/Resources/docSet.dsidx"
 
 cd "$BASE_DIR"
 
-# BASE_DIR=$PWD
+BASE_DIR=$PWD
 
-# echo 'Fetching (and updating) learnvimscriptthehardway'
-# if [ -d learnvimscriptthehardway ]; then
-#     cd learnvimscriptthehardway
-#     git pull
-#     cd ..
-# else
-#     git clone https://github.com/sjl/learnvimscriptthehardway
-# fi
-# 
-# echo 'Fetching (and updating) bookmarkdown'
-# if [ -d bookmarkdown ]; then
-#     cd bookmarkdown
-#     git pull
-#     cd ..
-# else
-#     git clone https://github.com/sjl/bookmarkdown.git
-# fi
-# 
-# python -c 'import baker' || error 'Please install baker, You can try:' \
-#     '"pip install baker"'
-# 
-# python -c 'import markdown' || error 'Please install markdown, You can try:' \
-#     '"pip install markdown"'
-# 
-# python -c 'import pyquery' || error 'Please install pyquery, You can try:' \
-#     '"pip install pyquery"'
-# 
-# cd learnvimscriptthehardway
-# echo 'Building learnvimscriptthehardway'
-# . ./build.sh
+echo 'Fetching (and updating) learnvimscriptthehardway'
+if [ -d learnvimscriptthehardway ]; then
+    cd learnvimscriptthehardway
+    git pull
+    cd ..
+else
+    git clone https://github.com/sjl/learnvimscriptthehardway
+fi
+
+echo 'Fetching (and updating) bookmarkdown'
+if [ -d bookmarkdown ]; then
+    cd bookmarkdown
+    git pull
+    cd ..
+else
+    git clone https://github.com/sjl/bookmarkdown.git
+fi
+
+python -c 'import baker' || error 'Please install baker, You can try:' \
+    '"pip install baker"'
+
+python -c 'import markdown' || error 'Please install markdown, You can try:' \
+    '"pip install markdown"'
+
+python -c 'import pyquery' || error 'Please install pyquery, You can try:' \
+    '"pip install pyquery"'
+
+cd learnvimscriptthehardway
+echo 'Building learnvimscriptthehardway'
+. ./build.sh
 
 cd "$BASE_DIR"
 
@@ -100,15 +100,21 @@ CREATE TABLE searchIndex(
 CREATE UNIQUE INDEX anchor ON searchIndex (name, type, path);
 " | sqlite3 "$DB"
 
-
+echo "Building search index"
 cd "$CONTENTS_DIR/Resources/Documents"
 for path in *.html; do
+    echo "$path"
     perl -pi -e 's%(href|src)="/%$1="%g' "$path"
     add_to_index "$path"
 done
 
 for path in */*.html; do
+    echo "$path"
     perl -pi -e 's%(href|src)="/%$1="../%g' "$path"
     add_to_index "$path"
 done
+
+cd "$BASE_DIR"
+echo "Packaging"
+tar --exclude='.DS_Store' -cvzf vimscript.tgz vimscript.docset
 
