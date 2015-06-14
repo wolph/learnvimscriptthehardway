@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Numbers / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#numbers">Numbers</a><ul>
+<li><a href="#number-formats">Number Formats</a></li>
+<li><a href="#float-formats">Float Formats</a></li>
+<li><a href="#coercion">Coercion</a></li>
+<li><a href="#division">Division</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/24.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/26.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="numbers">Numbers</h1>
+<p>Now it's time to start taking a closer look at the different types of variables
+you can use.  First we'll go over Vim's numeric types.</p>
+<p>Vimscript has two types of numeric variables: Numbers and Floats.  A Number is
+a 32 bit signed integer.  A Float is a floating point number.</p>
+<h2 id="number-formats">Number Formats</h2>
+<p>You can specify Numbers in a few different ways.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">100</span>
+</pre></div>
+
+
+<p>No surprises here -- Vim displays <code>100</code>.  Now run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">0</span>xff
+</pre></div>
+
+
+<p>This time Vim displays <code>255</code>.  You can specify numbers in hex notation by
+prefixing them with <code>0x</code> or <code>0X</code>.  Now run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">010</span>
+</pre></div>
+
+
+<p>You can also use octal by starting a number with a <code>0</code>.  Be careful with this,
+because it's easy to make mistakes.  Try the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">017</span>
+<span class="p">:</span><span class="k">echom</span> <span class="m">019</span>
+</pre></div>
+
+
+<p>Vim will print <code>15</code> for the first command, because <code>17</code> in octal is equal to
+<code>15</code> in decimal.  For the second command Vim treats it as a decimal number, even
+though it starts with a <code>0</code>, because it's not a valid octal number.</p>
+<p>Because Vim silently does the wrong thing in this case, I'd recommend avoiding
+the use of octal numbers when possible.</p>
+<h2 id="float-formats">Float Formats</h2>
+<p>Floats can also be specified in multiple ways.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">100</span>.<span class="m">1</span>
+</pre></div>
+
+
+<p>Notice that we're using <code>echo</code> here and not <code>echom</code> like we usually to.  We'll
+talk about why in a moment.</p>
+<p>Vim displays <code>100.1</code> as expected.  You can also use exponential notation.  Run
+this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">5</span>.<span class="m">45</span>e<span class="p">+</span><span class="m">3</span>
+</pre></div>
+
+
+<p>Vim displays <code>5450.0</code>.  A negative exponent can also be used.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">15</span>.<span class="m">45</span>e<span class="m">-2</span>
+</pre></div>
+
+
+<p>Vim displays <code>0.1545</code>.  The <code>+</code> or <code>-</code> before the power of ten is optional. If
+it's omitted then it's assumed to be positive.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">15</span>.<span class="m">3</span>e<span class="m">9</span>
+</pre></div>
+
+
+<p>Vim will display <code>1.53e10</code>, which is equivalent.  The decimal point and number
+after it are <em>not</em> optional.  Run the following command and see that it crashes:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">5</span>e<span class="m">10</span>
+</pre></div>
+
+
+<h2 id="coercion">Coercion</h2>
+<p>When you combine a Number and a Float through arithmetic, comparison, or any
+other operation Vim will cast the Number to a Float, resulting in a Float.  Run
+the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">2</span> * <span class="m">2</span>.<span class="m">0</span>
+</pre></div>
+
+
+<p>Vim displays <code>4.0</code>.</p>
+<h2 id="division">Division</h2>
+<p>When dividing two Numbers, the remainder is dropped.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">3</span> / <span class="m">2</span>
+</pre></div>
+
+
+<p>Vim displays <code>1</code>.  If you want Vim to perform floating point division one of the
+numbers needs to be a Float, which will cause the other one to be coerced to
+a Float as well.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="m">3</span> / <span class="m">2</span>.<span class="m">0</span>
+</pre></div>
+
+
+<p>Vim displays <code>1.5</code>.  The <code>3</code> is coerced to a Float, and then normal floating
+point division is performed.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help Float</code>.  When might floating point number not work in Vimscript?</p>
+<p>Read <code>:help floating-point-precision</code>.  What might this mean if you're writing
+a Vim plugin that deals with floating point numbers?</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/24.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/26.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

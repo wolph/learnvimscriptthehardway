@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Strict Mapping / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#strict-mapping">Strict Mapping</a><ul>
+<li><a href="#recursion">Recursion</a></li>
+<li><a href="#side-effects">Side Effects</a></li>
+<li><a href="#nonrecursive-mapping">Nonrecursive Mapping</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/04.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/06.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="strict-mapping">Strict Mapping</h1>
+<p>Get ready, because things are about to get a little wild.</p>
+<p>So far we've used <code>map</code>, <code>nmap</code>, <code>vmap</code>, and <code>imap</code> to create key mappings that
+will save time.  These work, but they have a downside.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>nmap <span class="p">-</span> dd
+<span class="p">:</span>nmap \ <span class="p">-</span>
+</pre></div>
+
+
+<p>Now try pressing <code>\</code> (in normal mode).  What happens?</p>
+<p>When you press <code>\</code> Vim sees the mapping and says "I should run <code>-</code> instead".
+But we've already mapped <code>-</code> to do something else!  Vim sees that and says "oh,
+now I need to run <code>dd</code>", and so it deletes the current line.</p>
+<p>When you map keys with these commands Vim will take <em>other</em> mappings into
+account.  This may sound like a good thing at first but in reality it's pure
+evil.  Let's talk about why, but first remove those mappings by running the
+following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>nunmap <span class="p">-</span>
+<span class="p">:</span>nunmap \
+</pre></div>
+
+
+<h2 id="recursion">Recursion</h2>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>nmap dd O<span class="p">&lt;</span>esc<span class="p">&gt;</span>jddk
+</pre></div>
+
+
+<p>At first glance it might look like this would map <code>dd</code> to:</p>
+<ul>
+<li>Open a new line above this one.</li>
+<li>Exit insert mode.</li>
+<li>Move back down.</li>
+<li>Delete the current line.</li>
+<li>Move up to the blank line just created.</li>
+</ul>
+<p>Effectively this should "clear the current line".  Try it.</p>
+<p>Vim will seem to freeze when you press <code>dd</code>.  If you press <code>&lt;c-c&gt;</code> you'll get
+Vim back, but there will be a ton of empty lines in your file!  What happened?</p>
+<p>This mapping is actually <em>recursive</em>!  When you press <code>dd</code>, Vim says:</p>
+<ul>
+<li><code>dd</code> is mapped, so perform the mapping.<ul>
+<li>Open a line.</li>
+<li>Exit insert mode.</li>
+<li>Move down a line.</li>
+<li><code>dd</code> is mapped, so perform the mapping.<ul>
+<li>Open a line.</li>
+<li>Exit insert mode.</li>
+<li>Move down a line.</li>
+<li><code>dd</code> is mapped, so perform the mapping, and so on.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p>This mapping can never finish running!  Go ahead and remove this terrible thing
+with the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>nunmap dd
+</pre></div>
+
+
+<h2 id="side-effects">Side Effects</h2>
+<p>One downside of the <code>*map</code> commands is the danger of recursing.  Another is that
+their behavior can change if you install a plugin that maps keys they depend on.</p>
+<p>When you install a new Vim plugin there's a good chance that you won't use and
+memorize every mapping it creates.  Even if you do, you'd have to go back and
+look through your <code>~/.vimrc</code> file to make sure none of your custom mappings use
+a key that the plugin has mapped.</p>
+<p>This would make installing plugins tedious and error-prone.  There must be
+a better way.</p>
+<h2 id="nonrecursive-mapping">Nonrecursive Mapping</h2>
+<p>Vim offers another set of mapping commands that will <em>not</em> take mappings into
+account when they perform their actions.  Run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>nmap <span class="k">x</span> dd
+<span class="p">:</span><span class="nb">nnoremap</span> \ <span class="k">x</span>
+</pre></div>
+
+
+<p>Now press <code>\</code> and see what happens.</p>
+<p>When you press <code>\</code> Vim ignores the <code>x</code> mapping and does whatever it would do for
+<code>x</code> by default.  Instead of deleting the current line, it deletes the current
+character.</p>
+<p>Each of the <code>*map</code> commands has a <code>*noremap</code> counterpart that ignores other
+mappings: <code>noremap</code>, <code>nnoremap</code>, <code>vnoremap</code>, and <code>inoremap</code>.</p>
+<p>When should you use these nonrecursive variants instead of their normal
+counterparts?</p>
+<p><strong>Always.</strong></p>
+<p><strong>No, seriously, <em>always</em>.</strong></p>
+<p>Using a bare <code>*map</code> is just <em>asking</em> for pain down the road when you install
+a plugin or add a new custom mapping.  Save yourself the trouble and type the
+extra characters to make sure it never happens.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Convert all the mappings you added to your <code>~/.vimrc</code> file in the previous
+chapters to their nonrecursive counterparts.</p>
+<p>Read <code>:help unmap</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/04.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/06.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

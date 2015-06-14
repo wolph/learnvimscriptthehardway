@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Dictionaries / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#dictionaries">Dictionaries</a><ul>
+<li><a href="#indexing">Indexing</a></li>
+<li><a href="#assigning-and-adding">Assigning and Adding</a></li>
+<li><a href="#removing-entries">Removing Entries</a></li>
+<li><a href="#dictionary-functions">Dictionary Functions</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/36.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/38.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="dictionaries">Dictionaries</h1>
+<p>The last type of Vimscript variable we'll talk about is the dictionary.
+Vimscript dictionaries are similar to Python's dicts, Ruby's hashes, and
+Javascript's objects.</p>
+<p>Dictionaries are created using curly brackets.  Values are heterogeneous, but
+<em>keys are always coerced to strings</em>.  You didn't think things were going to be
+<em>completely</em> sane, did you?</p>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span>}
+</pre></div>
+
+
+<p>Vim displays <code>{'a': 1, '100': 'foo'}</code>, which shows that Vimscript does indeed
+coerce keys to strings while leaving values alone.</p>
+<p>Vimscript avoids the stupidity of the Javascript standard and lets you use
+a comma after the last element in a dictionary.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span><span class="p">,</span>}
+</pre></div>
+
+
+<p>Once again Vim displays <code>{'a': 1, '100': 'foo'}</code>.  You should <em>always</em> use the
+trailing comma in your dictionaries, <em>especially</em> when they're defined on
+multiple lines, because it will make adding new entries less error-prone.</p>
+<h2 id="indexing">Indexing</h2>
+<p>To look up a key in a dictionary you use the same syntax as most languages.  Run
+this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span><span class="p">,</span>}[<span class="s1">'a'</span>]
+</pre></div>
+
+
+<p>Vim displays <code>1</code>.  Try it with a non-string index:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span><span class="p">,</span>}[<span class="m">100</span>]
+</pre></div>
+
+
+<p>Vim coerces the index to a string before performing the lookup, which makes
+sense since keys can only ever be strings.</p>
+<p>Vimscript also supports the Javascript-style "dot" lookup when the key is
+a string consisting only of letters, digits and/or underscores.  Try the
+following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span><span class="p">,</span>}.<span class="k">a</span>
+<span class="p">:</span>echo {<span class="s1">'a'</span>: <span class="m">1</span><span class="p">,</span> <span class="m">100</span>: <span class="s1">'foo'</span><span class="p">,</span>}.<span class="m">100</span>
+</pre></div>
+
+
+<p>Vim displays the correct element in both cases.  How you choose to index your
+dictionaries is a matter of taste and style.</p>
+<h2 id="assigning-and-adding">Assigning and Adding</h2>
+<p>Adding entries to dictionaries is done by simply assigning them like variables.
+Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> foo <span class="p">=</span> {<span class="s1">'a'</span>: <span class="m">1</span>}
+<span class="p">:</span><span class="k">let</span> foo.<span class="k">a</span> <span class="p">=</span> <span class="m">100</span>
+<span class="p">:</span><span class="k">let</span> foo.<span class="k">b</span> <span class="p">=</span> <span class="m">200</span>
+<span class="p">:</span>echo foo
+</pre></div>
+
+
+<p>Vim displays <code>{'a': 100, 'b': 200}</code>, which shows that assigning and adding
+entries both work the same way.</p>
+<h2 id="removing-entries">Removing Entries</h2>
+<p>There are two ways to remove entries from a dictionary.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> test <span class="p">=</span> remove<span class="p">(</span>foo<span class="p">,</span> <span class="s1">'a'</span><span class="p">)</span>
+<span class="p">:</span>unlet foo.<span class="k">b</span>
+<span class="p">:</span>echo foo
+<span class="p">:</span>echo test
+</pre></div>
+
+
+<p>Vim displays <code>{}</code> and <code>100</code>.  The <code>remove</code> function will remove the entry with
+the given key from the given dictionary and return the removed value.  The
+<code>unlet</code> command also removes dictionary entries, but you can't use the value.</p>
+<p>You cannot remove nonexistent entries from a dictionary.  Try running this
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>unlet foo[<span class="s2">"asdf"</span>]
+</pre></div>
+
+
+<p>Vim throws an error.</p>
+<p>The choice of <code>remove</code> or <code>unlet</code> is mostly a matter of personal taste.  If
+pressed I'd recommend using <code>remove</code> everywhere because it's more flexible than
+<code>unlet</code>.  <code>remove</code> can do anything <code>unlet</code> can do but the reverse isn't true, so
+you can always be consistent if you use <code>remove</code>.</p>
+<h2 id="dictionary-functions">Dictionary Functions</h2>
+<p>Like lists, Vim has a number of built-in functions for working with
+dictionaries.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> get<span class="p">(</span>{<span class="s1">'a'</span>: <span class="m">100</span>}<span class="p">,</span> <span class="s1">'a'</span><span class="p">,</span> <span class="s1">'default'</span><span class="p">)</span>
+<span class="p">:</span><span class="k">echom</span> get<span class="p">(</span>{<span class="s1">'a'</span>: <span class="m">100</span>}<span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'default'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>100</code> and <code>default</code>, just like the <code>get</code> function for lists.</p>
+<p>You can also check if a given key is present in a given dictionary.  Run this
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> has_key<span class="p">(</span>{<span class="s1">'a'</span>: <span class="m">100</span>}<span class="p">,</span> <span class="s1">'a'</span><span class="p">)</span>
+<span class="p">:</span><span class="k">echom</span> has_key<span class="p">(</span>{<span class="s1">'a'</span>: <span class="m">100</span>}<span class="p">,</span> <span class="s1">'b'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>1</code> and <code>0</code>.  Remember that Vimscript treats <code>0</code> as falsy and any
+other number as truthy.</p>
+<p>You can pull the key-value pairs out of a dictionary with <code>items</code>.  Run this
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo items<span class="p">(</span>{<span class="s1">'a'</span>: <span class="m">100</span><span class="p">,</span> <span class="s1">'b'</span>: <span class="m">200</span>}<span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display a nested list that looks something like <code>[['a', 100], ['b',
+200]]</code>.  As far as I can tell Vimscript dictionaries are <em>not</em> guaranteed to be
+ordered, so don't expect that the items you get out of an <code>items</code> call will be
+in a specific order!</p>
+<p>You can get just the keys or just the values with the <code>keys</code> and <code>values</code>
+functions.  They work as expected -- look them up.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help Dictionary</code>.  All of it.  Notice the capital <code>D</code>.</p>
+<p>Read <code>:help get()</code>.</p>
+<p>Read <code>:help has_key()</code>.</p>
+<p>Read <code>:help items()</code>.</p>
+<p>Read <code>:help keys()</code>.</p>
+<p>Read <code>:help values()</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/36.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/38.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

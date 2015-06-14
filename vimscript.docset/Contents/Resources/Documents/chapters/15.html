@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Operator-Pending Mappings / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#operator-pending-mappings">Operator-Pending Mappings</a><ul>
+<li><a href="#movement-mappings">Movement Mappings</a></li>
+<li><a href="#changing-the-start">Changing the Start</a></li>
+<li><a href="#general-rules">General Rules</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/14.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/16.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="operator-pending-mappings">Operator-Pending Mappings</h1>
+<p>In this chapter we're going to explore one more rabbit hole in Vim's mapping
+system: "operator-pending mappings".  Let's step back for a second and make sure
+we're clear on vocabulary.</p>
+<p>An operator is a command that waits for you to enter a movement command, and
+then does something on the text between where you currently are and where the
+movement would take you.</p>
+<p>Some examples of operators are <code>d</code>, <code>y</code>, and <code>c</code>.  For example:</p>
+<div class="codehilite"><pre>Keys   Operator   Movement
+----   --------   -------------
+dw     Delete     to next word
+ci(    Change     inside parens
+yt,    Yank       until comma
+</pre></div>
+
+
+<h2 id="movement-mappings">Movement Mappings</h2>
+<p>Vim lets you create new movements that work with all existing commands.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap <span class="k">p</span> <span class="k">i</span><span class="p">(</span>
+</pre></div>
+
+
+<p>Now type the following text into a buffer:</p>
+<div class="codehilite"><pre>return person.get_pets(type="cat", fluffy_only=True)
+</pre></div>
+
+
+<p>Put your cursor on the word "cat" and type <code>dp</code>.  What happened?  Vim deleted
+all the text inside the parentheses.  You can think of this new movement as
+"parameters".</p>
+<p>The <code>onoremap</code> command tells Vim that when it's waiting for a movement to give
+to an operator and it sees <code>p</code>, it should treat it like <code>i(</code>.  When we ran <code>dp</code>
+it was like saying "delete parameters", which Vim translates to "delete inside
+parentheses".</p>
+<p>We can use this new mapping immediately with all operators.  Type the same text
+as before into the buffer (or simply undo the change):</p>
+<div class="codehilite"><pre>return person.get_pets(type="cat", fluffy_only=True)
+</pre></div>
+
+
+<p>Put your cursor on the word "cat" and type <code>cp</code>.  What happened?  Vim deleted
+all the text inside the parentheses, but this time it left you in insert mode
+because you used "change" instead of "delete".</p>
+<p>Let's try another example.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap <span class="k">b</span> /<span class="k">return</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Now type the following text into a buffer:</p>
+<div class="codehilite"><pre><span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+    <span class="k">print</span> <span class="n">i</span>
+
+    <span class="k">return</span> <span class="n">foo</span>
+</pre></div>
+
+
+<p>Put your cursor on the <code>i</code> in the second line and press <code>db</code>.  What happened?
+Vim deleted the entire body of the function, all the way up until the <code>return</code>,
+which our mapping used Vim's normal search to find.</p>
+<p>When you're trying to think about how to define a new operator-pending movement,
+you can think of it like this:</p>
+<ol>
+<li>Start at the cursor position.</li>
+<li>Enter visual mode (charwise).</li>
+<li>... mapping keys go here ...</li>
+<li>All the text you want to include in the movement should now be selected.</li>
+</ol>
+<p>It's your job to fill in step three with the appropriate keys.</p>
+<h2 id="changing-the-start">Changing the Start</h2>
+<p>You may have already seen a problem in what we've learned so far.  If our
+movements always have to start at the current cursor position it limits what we
+can do.</p>
+<p>Vim isn't in the habit of limiting what you can do, so of course there's a way
+around this problem.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap <span class="k">in</span><span class="p">(</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>normal<span class="p">!</span> <span class="k">f</span><span class="p">(</span><span class="k">vi</span><span class="p">(&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>This might look frightening, but let's try it out.  Enter the following text
+into the buffer:</p>
+<div class="codehilite"><pre><span class="k">print</span> <span class="n">foo</span><span class="p">(</span><span class="n">bar</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Put your cursor somewhere in the word <code>print</code> and type <code>cin(</code>.  Vim will delete
+the contents of the parentheses and place you in insert mode between them.</p>
+<p>You can think of this mapping as meaning "inside next parentheses", and it will
+perform the operator on the text inside the next set of parentheses on the
+current line.</p>
+<p>Let's make a companion "inside last parentheses" ("previous" would be a better
+word, but it would shadow the "paragraph" movement).  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap <span class="k">il</span><span class="p">(</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>normal<span class="p">!</span> F<span class="p">)</span><span class="k">vi</span><span class="p">(&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Try it out on some text of your own to make sure it works.</p>
+<p>So how do these mappings work?  First, the <code>&lt;c-u&gt;</code> is something special that you
+can ignore for now -- just trust me that it needs to be there to make the
+mappings work in all cases.  If we remove that we're left with:</p>
+<div class="codehilite"><pre><span class="p">:</span>normal<span class="p">!</span> F<span class="p">)</span><span class="k">vi</span><span class="p">(&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p><code>:normal!</code> is something we'll talk about in a later chapter, but for now it's
+enough to know that it is a command used to simulate pressing keys in normal
+mode.  For example, running <code>:normal! dddd</code> will delete two lines, just like
+pressing <code>dddd</code>.  The <code>&lt;cr&gt;</code> at the end of the mapping is what executes the
+<code>:normal!</code> command.</p>
+<p>So now we know that the mapping is essentially just running the last block of
+keys:</p>
+<div class="codehilite"><pre>F<span class="p">)</span><span class="k">vi</span><span class="p">(</span>
+</pre></div>
+
+
+<p>This is fairly simple:</p>
+<ul>
+<li><code>F)</code>: Move backwards to the nearest <code>)</code> character.</li>
+<li><code>vi(</code>: Visually select inside the parentheses.</li>
+</ul>
+<p>We end up with the text we want to operate on visually selected, and Vim
+performs the operation on it as normal.</p>
+<h2 id="general-rules">General Rules</h2>
+<p>A good way to keep the multiple ways of creating operator-pending mappings
+straight is the remember the following two rules:</p>
+<ul>
+<li>If your operator-pending mapping ends with some text visually selected, Vim
+  will operate on that text.</li>
+<li>Otherwise, Vim will operate on the text between the original cursor position
+  and the new position.</li>
+</ul>
+<h2 id="exercises">Exercises</h2>
+<p>Create operator-pending mappings for "around next parentheses" and "around last
+parentheses".</p>
+<p>Create similar mappings for in/around next/last for curly brackets.</p>
+<p>Read <code>:help omap-info</code> and see if you can puzzle out what the <code>&lt;c-u&gt;</code> in the
+examples is for.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/14.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/16.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

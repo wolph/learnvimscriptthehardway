@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Basic Mapping / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#basic-mapping">Basic Mapping</a><ul>
+<li><a href="#special-characters">Special Characters</a></li>
+<li><a href="#commenting">Commenting</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/02.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/04.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="basic-mapping">Basic Mapping</h1>
+<p>If there's one feature of Vimscript that will let you bend Vim to your will more
+than any other, it's the ability to map keys.  Mapping keys lets you tell Vim:</p>
+<blockquote>
+<p>When I press this key, I want you to do this stuff instead of whatever you
+would normally do.</p>
+</blockquote>
+<p>We're going to start off by mapping keys in normal mode.  We'll talk about how
+to map keys in insert and other modes in the next chapter.</p>
+<p>Type a few lines of text into a file, then run:</p>
+<div class="codehilite"><pre><span class="p">:</span>map <span class="p">-</span> <span class="k">x</span>
+</pre></div>
+
+
+<p>Put your cursor somewhere in the text and press <code>-</code>.  Notice how Vim deleted the
+character under the cursor, just like if you had pressed <code>x</code>.</p>
+<p>We already have a key for "delete the character under the cursor", so let's
+change that mapping to something slightly more useful.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>map <span class="p">-</span> dd
+</pre></div>
+
+
+<p>Now put your cursor on a line somewhere and press <code>-</code> again.  This time Vim
+deletes the entire line, because that's what <code>dd</code> does.</p>
+<h2 id="special-characters">Special Characters</h2>
+<p>You can use <code>&lt;keyname&gt;</code> to tell Vim about special keys.  Try running this
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>map <span class="p">&lt;</span>space<span class="p">&gt;</span> viw
+</pre></div>
+
+
+<p>Put your cursor on a word in your text and press the space bar.  Vim will
+visually select the word.</p>
+<p>You can also map modifier keys like Ctrl and Alt.  Run this:</p>
+<div class="codehilite"><pre><span class="p">:</span>map <span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">d</span><span class="p">&gt;</span> dd
+</pre></div>
+
+
+<p>Now pressing <code>Ctrl+d</code> on your keyboard will run <code>dd</code>.</p>
+<h2 id="commenting">Commenting</h2>
+<p>Remember in the first lesson where we talked about comments?  Mapping keys is
+one of the places where Vim comments don't work.  Try running this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>map <span class="p">&lt;</span>space<span class="p">&gt;</span> viw <span class="c">" Select word</span>
+</pre></div>
+
+
+<p>If you try pressing space now, something horrible will almost certainly happen.
+Why?</p>
+<p>When you press the space bar now, Vim thinks you want it to do what
+<code>viw&lt;space&gt;"&lt;space&gt;Select&lt;space&gt;word</code> would do.  Obviously this isn't what we
+want.</p>
+<p>If you look closely at the effect of this mapping you might notice something
+strange.  Take a few minutes to try to figure out exactly what happens when you
+use it, and <em>why</em> that happens.</p>
+<p>Don't worry if you don't get it right away -- we'll talk about it more soon.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Map the <code>-</code> key to "delete the current line, then paste it below the one we're
+on now".  This will let you move lines downward in your file with one keystroke.</p>
+<p>Add that mapping command to your <code>~/.vimrc</code> file so you can use it any time
+you start Vim.</p>
+<p>Figure out how to map the <code>_</code> key to move the line up instead of down.</p>
+<p>Add that mapping to your <code>~/.vimrc</code> file too.</p>
+<p>Try to guess how you might remove a mapping and reset a key to its normal
+function.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/02.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/04.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

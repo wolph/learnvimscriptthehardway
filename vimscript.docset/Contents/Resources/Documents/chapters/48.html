@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Basic Folding / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#basic-folding">Basic Folding</a><ul>
+<li><a href="#types-of-folding">Types of Folding</a><ul>
+<li><a href="#manual">Manual</a></li>
+<li><a href="#marker">Marker</a></li>
+<li><a href="#diff">Diff</a></li>
+<li><a href="#expr">Expr</a></li>
+<li><a href="#indent">Indent</a></li>
+</ul>
+</li>
+<li><a href="#potion-folding">Potion Folding</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/47.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/49.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="basic-folding">Basic Folding</h1>
+<p>If you've never used code folding in Vim, you don't know what you're missing.
+Read <code>:help usr_28</code> and spend some time playing around with it in your normal
+work.  Come back to this chapter once you've got it in your fingers.</p>
+<h2 id="types-of-folding">Types of Folding</h2>
+<p>Vim supports six different ways of defining how your text should be folded.</p>
+<h3 id="manual">Manual</h3>
+<p>You create the folds by hand and they're stored in RAM by Vim.  When you close
+Vim they go away and you have to recreate them the next time you edit the file.</p>
+<p>This method can be handy if you combine it with some custom mappings to make it
+easy to create folds.  We won't do that in this book, but keep it in the back
+of your mind in case you run across a case where it could be handy.</p>
+<h3 id="marker">Marker</h3>
+<p>Vim folds your code based on characters in the actual text.</p>
+<p>Usually these characters are put in comments (like <code>// {{{</code>), but in some
+languages you can get away with using something in the language's syntax itself,
+like <code>{</code> and <code>}</code> in Javascript files.</p>
+<p>It may seem ugly to clutter up your code with comments that are purely for your
+text editor, but the advantage is that it lets you hand-craft folds for
+a specific file.  This can be really nice if you're working with a large file
+that you want to organize in a very specific way.</p>
+<h3 id="diff">Diff</h3>
+<p>A special folding mode used when diff'ing files.  We won't talk about this one
+at all because Vim automatically handles it.</p>
+<h3 id="expr">Expr</h3>
+<p>This lets you use a custom piece of Vimscript to define where folds occur.  It's
+the most powerful method, but also requires the most work.  We'll talk about
+this in the next chapter.</p>
+<h3 id="indent">Indent</h3>
+<p>Vim uses your code's indentation to determine folds.  Lines at the same
+indentation level fold together, and lines with only whitespace (and blank
+lines) are simply folded with their neighbors.</p>
+<p>This is essentially free to use because your code is already indented; all you
+have to do is turn it on.  This will be our first method of adding folding to
+Potion files.</p>
+<h2 id="potion-folding">Potion Folding</h2>
+<p>Let's take a look at our sample Potion file once again:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
+        total *= i.
+    total.
+
+10 times (i):
+    i string print
+    '! is: ' print
+    factorial (i) string print
+    "\n" print.
+</pre></div>
+
+
+<p>The bodies of the function and loop are both indented.  This means we can get
+some basic folding with very little effort by using indent folding.</p>
+<p>Before we start, go ahead and add a comment above the <code>total *= i.</code> line so we
+have a nice multiple-line inner block to test with.  You'll learn why we need to
+do this when you do the exercises, but for now just trust me.  The file should
+now look like this:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
+        # Multiply the running total.
+        total *= i.
+    total.
+
+10 times (i):
+    i string print
+    '! is: ' print
+    factorial (i) string print
+    "\n" print.
+</pre></div>
+
+
+<p>Create an <code>ftplugin</code> folder in your Potion plugin's repository, and create
+a <code>potion</code> folder inside that.  Finally, create a <code>folding.vim</code> file inside of
+<em>that</em>.</p>
+<p>Remember that Vim will run the code in this file whenever it sets a buffer's
+<code>filetype</code> to <code>potion</code> (because it's in a folder named <code>potion</code>).</p>
+<p>Putting all folding-related code into its own file is generally a good idea and
+will help us keep the various functionality of our plugin organized.</p>
+<p>Add the following line to this file:</p>
+<div class="codehilite"><pre><span class="k">setlocal</span> <span class="nb">foldmethod</span><span class="p">=</span>indent
+</pre></div>
+
+
+<p>Close Vim and open the <code>factorial.pn</code> file again.  Play around with the new
+folding with <code>zR</code>, <code>zM</code>, and <code>za</code>.</p>
+<p>One line of Vimscript gave us some useful folding!  That's pretty cool!</p>
+<p>You might notice that the lines inside the inner loop of the <code>factorial</code>
+function aren't folded even though they're indented.  What's going on?</p>
+<p>It turns out that by default Vim will ignore lines beginning with a <code>#</code>
+character when using <code>indent</code> folding.  This works great when editing C files
+(where <code>#</code> signals a preprocessor directive) but isn't very helpful when you're
+editing other types of files.</p>
+<p>Let's add one more line to the <code>ftplugin/potion/folding.vim</code> file to fix this:</p>
+<div class="codehilite"><pre><span class="k">setlocal</span> <span class="nb">foldmethod</span><span class="p">=</span>indent
+<span class="k">setlocal</span> <span class="nb">foldignore</span><span class="p">=</span>
+</pre></div>
+
+
+<p>Close and reopen <code>factorial.pn</code> and now the inner block will be folded properly.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help foldmethod</code>.</p>
+<p>Read <code>:help fold-manual</code>.</p>
+<p>Read <code>:help fold-marker</code> and <code>:help foldmarker</code>.</p>
+<p>Read <code>:help fold-indent</code>.</p>
+<p>Read <code>:help fdl</code> and <code>:help foldlevelstart</code>.</p>
+<p>Read <code>:help foldminlines</code>.</p>
+<p>Read <code>:help foldignore</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/47.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/49.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

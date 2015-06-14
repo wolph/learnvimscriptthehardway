@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Autocommands / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#autocommands">Autocommands</a><ul>
+<li><a href="#autocommand-structure">Autocommand Structure</a></li>
+<li><a href="#another-example">Another Example</a></li>
+<li><a href="#multiple-events">Multiple Events</a></li>
+<li><a href="#filetype-events">FileType Events</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/11.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/13.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="autocommands">Autocommands</h1>
+<p>Now we're going to look at a topic almost as important as mappings:
+autocommands.</p>
+<p>Autocommands are a way to tell Vim to run certain commands whenever certain
+events happen.  Let's dive right into an example.</p>
+<p>Open a new file with <code>:edit foo</code> and close it right away with <code>:quit</code>.  Look on
+your hard drive and you'll notice that the file is not there.  This is because
+Vim doesn't actually <em>create</em> the file until you save it for the first time.</p>
+<p>Let's change it so that Vim creates files as soon as you edit them.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufNewFile</span> * :<span class="nb">write</span>
+</pre></div>
+
+
+<p>This is a lot to take in, but try it out and see that it works.  Run <code>:edit foo</code>
+again, close it with <code>:quit</code>, and look at your hard drive.  This time the file
+will be there (and empty, of course).</p>
+<p>You'll have to close Vim to remove the autocommand.  We'll talk about how to
+avoid this in a later chapter.</p>
+<h2 id="autocommand-structure">Autocommand Structure</h2>
+<p>Let's take a closer look at the autocommand we just created:</p>
+<div class="codehilite"><pre>:autocmd BufNewFile * :write
+         ^          ^ ^
+         |          | |
+         |          | The command to run.
+         |          |
+         |          A "pattern" to filter the event.
+         |
+         The "event" to watch for.
+</pre></div>
+
+
+<p>The first piece of the command is the type of event we want to watch for.  Vim
+offers <em>many</em> events to watch.  Some of them include:</p>
+<ul>
+<li>Starting to edit a file that doesn't already exist.</li>
+<li>Reading a file, whether it exists or not.</li>
+<li>Switching a buffer's <code>filetype</code> setting.</li>
+<li>Not pressing a key on your keyboard for a certain amount of time.</li>
+<li>Entering insert mode.</li>
+<li>Exiting insert mode.</li>
+</ul>
+<p>This is just a tiny sample of the available events.  There are many more you can
+use to do lots of interesting things.</p>
+<p>The next part of the command is a "pattern" that lets you be more specific about
+when you want the command to fire.  Start up a new Vim instance and run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufNewFile</span> *.txt :<span class="nb">write</span>
+</pre></div>
+
+
+<p>This is almost the same as the last command, but this time it will only apply to
+files whose names end in <code>.txt</code>.</p>
+<p>Try it out by running <code>:edit bar</code>, then <code>:quit</code>, then <code>:edit bar.txt</code>, then
+<code>:quit</code>.  You'll see that Vim writes the <code>bar.txt</code> automatically, but <em>doesn't</em>
+write <code>bar</code> because it doesn't match the pattern.</p>
+<p>The final part of the command is the command we want to run when the event
+fires.  This is pretty self-explanatory, except for one catch: you can't use
+special characters like <code>&lt;cr&gt;</code> in the command.  We'll talk about how to get
+around this limitation later in the book, but for now you'll just have to live
+with it.</p>
+<h2 id="another-example">Another Example</h2>
+<p>Let's define another autocommand, this time using a different event.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWritePre</span> *.html :normal gg<span class="p">=</span>G
+</pre></div>
+
+
+<p>We're getting a bit ahead of ourselves here because we're going to talk about
+<code>normal</code> later in the book, but for now you'll need to bear with me because it's
+tough to come up with useful examples at this point.</p>
+<p>Create a new file called <code>foo.html</code>.  Edit it with Vim and enter the following
+text <em>exactly</em>, including the whitespace:</p>
+<div class="codehilite"><pre><span class="nt">&lt;html&gt;</span>
+<span class="nt">&lt;body&gt;</span>
+ <span class="nt">&lt;p&gt;</span>Hello!<span class="nt">&lt;/p&gt;</span>
+                 <span class="nt">&lt;/body&gt;</span>
+                  <span class="nt">&lt;/html&gt;</span>
+</pre></div>
+
+
+<p>Now save this file with <code>:w</code>.  What happened?  Vim seems to have reindented the
+file for us before saving it!</p>
+<p>For now I want you to trust me that running <code>:normal gg=G</code> will tell Vim to
+reindent the current file.  Don't worry about how that works just yet.</p>
+<p>What we <em>do</em> want to pay attention to is the autocommand.  The event type is
+<code>BufWritePre</code>, which means the event will be checked just before you write <em>any</em>
+file.</p>
+<p>We used a pattern of <code>*.html</code> to ensure that this command will only fire when
+we're working on files that end in <code>.html</code>.  This lets us target our
+autocommands at specific files, which is a very powerful idea that we'll
+continue to explore later on.</p>
+<h2 id="multiple-events">Multiple Events</h2>
+<p>You can create a single autocommand bound to <em>multiple</em> events by separating the
+events with a comma.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWritePre</span><span class="p">,</span><span class="nb">BufRead</span> *.html :normal gg<span class="p">=</span>G
+</pre></div>
+
+
+<p>This is almost like our last command, except it will also reindent the code
+whenever we <em>read</em> an HTML file as well as when we write it.  This could be
+useful if you have coworkers that don't indent their HTML nicely.</p>
+<p>A common idiom in Vim scripting is to pair the <code>BufRead</code> and <code>BufNewFile</code> events
+together to run a command whenever you open a certain kind of file, regardless
+of whether it happens to exist already or not.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufNewFile</span><span class="p">,</span><span class="nb">BufRead</span> *.html <span class="k">setlocal</span> <span class="nb">nowrap</span>
+</pre></div>
+
+
+<p>This will turn line wrapping off whenever you're working on an HTML file.</p>
+<h2 id="filetype-events">FileType Events</h2>
+<p>One of the most useful events is the <code>FileType</code> event.  This event is fired
+whenever Vim sets a buffer's <code>filetype</code>.</p>
+<p>Let's set up a few useful mappings for a variety of file types.  Run the
+following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">FileType</span> javascript <span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>localleader<span class="p">&gt;</span><span class="k">c</span> I<span class="sr">//</span><span class="p">&lt;</span>esc<span class="p">&gt;</span>
+<span class="p">:</span>autocmd <span class="nb">FileType</span> python     <span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>localleader<span class="p">&gt;</span><span class="k">c</span> I#<span class="p">&lt;</span>esc<span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Open a Javascript file (a file that ends in <code>.js</code>), pick a line and type
+<code>&lt;localleader&gt;c</code>.  This will comment out the line.</p>
+<p>Now open a Python file (a file that ends in <code>.py</code>), pick a line and type
+<code>&lt;localleader&gt;c</code>.  This will comment out the line, but it will use Python's
+comment character!</p>
+<p>Using autocommands alongside the buffer-local mappings we learned about in the
+last chapter we can create mappings that are specific to the type of file that
+we're editing.</p>
+<p>This reduces the load on our minds when we're coding.  Instead of having to
+think about moving to the beginning of the line and adding a comment character
+we can simply think "comment this line".</p>
+<h2 id="exercises">Exercises</h2>
+<p>Skim <code>:help autocmd-events</code> to see a list of all the events you can bind
+autocommands to.  You don't need to memorize each one right now.  Just try to
+get a feel for the kinds of things you can do.</p>
+<p>Create a few <code>FileType</code> autocommands that use <code>setlocal</code> to set options for your
+favorite filetypes just the way you like them.  Some options you might like to
+change on a per-filetype basis are <code>wrap</code>, <code>list</code>, <code>spell</code>, and <code>number</code>.</p>
+<p>Create a few more "comment this line" autocommands for filetypes you work with
+often.</p>
+<p>Add all of these autocommands to your <code>~/.vimrc</code> file.  Use your shortcut
+mappings for editing and sourcing it quickly, of course!</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/11.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/13.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

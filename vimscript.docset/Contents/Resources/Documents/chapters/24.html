@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Function Arguments / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#function-arguments">Function Arguments</a><ul>
+<li><a href="#varargs">Varargs</a></li>
+<li><a href="#assignment">Assignment</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/23.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/25.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="function-arguments">Function Arguments</h1>
+<p>Vimscript functions can, of course, take arguments.  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> DisplayName<span class="p">(</span>name<span class="p">)</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="s2">"Hello!  My name is:"</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:name
+<span class="p">:</span><span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Run the function:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">call</span> DisplayName<span class="p">(</span><span class="s2">"Your Name"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display two lines: <code>Hello!  My name is:</code> and <code>Your Name</code>.</p>
+<p>Notice the <code>a:</code> in the name of the variable that we passed to the <code>echom</code>
+command.  This represents a variable scope, which we talked about in an earlier
+chapter.</p>
+<p>Let's remove this scope prefix and see how Vim reacts.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> UnscopedDisplayName<span class="p">(</span>name<span class="p">)</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="s2">"Hello!  My name is:"</span>
+<span class="p">:</span>  <span class="k">echom</span> name
+<span class="p">:</span><span class="k">endfunction</span>
+<span class="p">:</span><span class="k">call</span> UnscopedDisplayName<span class="p">(</span><span class="s2">"Your Name"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This time Vim complains that it can't find the variable <code>name</code>.</p>
+<p>When you write a Vimscript function that takes arguments you <em>always</em> need to
+prefix those arguments with <code>a:</code> when you use them to tell Vim that they're in
+the argument scope.</p>
+<h2 id="varargs">Varargs</h2>
+<p>Vimscript functions can optionally take variable-length argument lists like
+Javascript and Python.  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> Varg<span class="p">(</span>...<span class="p">)</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:<span class="m">0</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:<span class="m">1</span>
+<span class="p">:</span>  echo <span class="k">a</span>:<span class="m">000</span>
+<span class="p">:</span><span class="k">endfunction</span>
+
+<span class="p">:</span><span class="k">call</span> Varg<span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This function shows us several things, so let's look at each one individually.</p>
+<p>The <code>...</code> in the function definition tells Vim that this function can take any
+number of arguments.  This is like a <code>*args</code> argument in a Python function.</p>
+<p>The first line of the function echoes the message <code>a:0</code> and displays <code>2</code>.  When
+you define a function that takes a variable number of arguments in Vim, <code>a:0</code>
+will be set to the number of extra arguments you were given.  In this case we
+passed two arguments to <code>Varg</code> so Vim displayed <code>2</code>.</p>
+<p>The second line echoes <code>a:1</code> which displays <code>a</code>.  You can use <code>a:1</code>, <code>a:2</code>, etc
+to refer to each extra argument your function receives.  If we had used <code>a:2</code>
+Vim would have displayed "b".</p>
+<p>The third line is a bit trickier.  When a function has varargs, <code>a:000</code> will be
+set to a list containing all the extra arguments that were passed.  We haven't
+looked at lists quite yet, so don't worry about this too much.  You can't use
+<code>echom</code> with a list, which is why we used <code>echo</code> instead for that line.</p>
+<p>You can use varargs together with regular arguments too.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> Varg2<span class="p">(</span>foo<span class="p">,</span> ...<span class="p">)</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:foo
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:<span class="m">0</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:<span class="m">1</span>
+<span class="p">:</span>  echo <span class="k">a</span>:<span class="m">000</span>
+<span class="p">:</span><span class="k">endfunction</span>
+
+<span class="p">:</span><span class="k">call</span> Varg2<span class="p">(</span><span class="s2">"a"</span><span class="p">,</span> <span class="s2">"b"</span><span class="p">,</span> <span class="s2">"c"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>We can see that Vim puts <code>"a"</code> into the named argument <code>a:foo</code>, and the rest are
+put into the list of varargs.</p>
+<h2 id="assignment">Assignment</h2>
+<p>Try running the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> Assign<span class="p">(</span>foo<span class="p">)</span>
+<span class="p">:</span>  <span class="k">let</span> <span class="k">a</span>:foo <span class="p">=</span> <span class="s2">"Nope"</span>
+<span class="p">:</span>  <span class="k">echom</span> <span class="k">a</span>:foo
+<span class="p">:</span><span class="k">endfunction</span>
+
+<span class="p">:</span><span class="k">call</span> Assign<span class="p">(</span><span class="s2">"test"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will throw an error, because you can't reassign argument variables.  Now run
+these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">function</span> AssignGood<span class="p">(</span>foo<span class="p">)</span>
+<span class="p">:</span>  <span class="k">let</span> foo_tmp <span class="p">=</span> <span class="k">a</span>:foo
+<span class="p">:</span>  <span class="k">let</span> foo_tmp <span class="p">=</span> <span class="s2">"Yep"</span>
+<span class="p">:</span>  <span class="k">echom</span> foo_tmp
+<span class="p">:</span><span class="k">endfunction</span>
+
+<span class="p">:</span><span class="k">call</span> AssignGood<span class="p">(</span><span class="s2">"test"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This time the function works, and Vim displays <code>Yep</code>.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read the first two paragraphs of <code>:help function-argument</code>.</p>
+<p>Read <code>:help local-variables</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/23.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/25.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

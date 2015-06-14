@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Setting Options / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#setting-options">Setting Options</a><ul>
+<li><a href="#boolean-options">Boolean Options</a></li>
+<li><a href="#toggling-boolean-options">Toggling Boolean Options</a></li>
+<li><a href="#checking-options">Checking Options</a></li>
+<li><a href="#options-with-values">Options with Values</a></li>
+<li><a href="#setting-multiple-options-at-once">Setting Multiple Options at Once</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/01.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/03.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="setting-options">Setting Options</h1>
+<p>Vim has many options you can set to change how it behaves.</p>
+<p>There are two main kinds of options: boolean options (either "on" or "off") and
+options that take a value.</p>
+<h2 id="boolean-options">Boolean Options</h2>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">number</span>
+</pre></div>
+
+
+<p>Line numbers should appear on the left side of the window if they weren't there
+already.  Now run this:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">nonumber</span>
+</pre></div>
+
+
+<p>The line numbers should disappear.  <code>number</code> is a boolean option: it can be off
+or on.  You turn it "on" by running <code>:set number</code> and "off" with <code>:set
+nonumber</code>.</p>
+<p>All boolean options work this way.  <code>:set &lt;name&gt;</code> turns the option on and <code>:set
+no&lt;name&gt;</code> turns it off.</p>
+<h2 id="toggling-boolean-options">Toggling Boolean Options</h2>
+<p>You can also "toggle" boolean options to set them to the <em>opposite</em> of whatever
+they are now.  Run this:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">number</span><span class="p">!</span>
+</pre></div>
+
+
+<p>The line numbers should reappear.  Now run it again:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">number</span><span class="p">!</span>
+</pre></div>
+
+
+<p>They should disappear once more.  Adding a <code>!</code> (exclamation point or "bang") to
+a boolean option toggles it.</p>
+<h2 id="checking-options">Checking Options</h2>
+<p>You can ask Vim what an option is currently set to by using a <code>?</code>.  Run these
+commands and watch what happens after each:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">number</span>
+<span class="p">:</span><span class="k">set</span> <span class="k">number</span>?
+<span class="p">:</span><span class="k">set</span> <span class="nb">nonumber</span>
+<span class="p">:</span><span class="k">set</span> <span class="k">number</span>?
+</pre></div>
+
+
+<p>Notice how the first <code>:set number?</code> command displayed <code>number</code> while the second
+displayed <code>nonumber</code>.</p>
+<h2 id="options-with-values">Options with Values</h2>
+<p>Some options take a value instead of just being off or on.  Run the following
+commands and watch what happens after each:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">number</span>
+<span class="p">:</span><span class="k">set</span> <span class="nb">numberwidth</span><span class="p">=</span><span class="m">10</span>
+<span class="p">:</span><span class="k">set</span> <span class="nb">numberwidth</span><span class="p">=</span><span class="m">4</span>
+<span class="p">:</span><span class="k">set</span> <span class="nb">numberwidth</span>?
+</pre></div>
+
+
+<p>The <code>numberwidth</code> option changes how wide the column containing line numbers
+will be.  You can change non-boolean options with <code>:set &lt;name&gt;=&lt;value&gt;</code>, and
+check them the usual way (<code>:set &lt;name&gt;?</code>).</p>
+<p>Try checking what a few other common options are set to:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">wrap</span>?
+<span class="p">:</span><span class="k">set</span> <span class="nb">shiftround</span>?
+<span class="p">:</span><span class="k">set</span> <span class="nb">matchtime</span>?
+</pre></div>
+
+
+<h2 id="setting-multiple-options-at-once">Setting Multiple Options at Once</h2>
+<p>Finally, you can specify more than one option in the same <code>:set</code> command to save
+on some typing.  Try running this:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">numberwidth</span><span class="p">=</span><span class="m">2</span>
+<span class="p">:</span><span class="k">set</span> <span class="nb">nonumber</span>
+<span class="p">:</span><span class="k">set</span> <span class="k">number</span> <span class="nb">numberwidth</span><span class="p">=</span><span class="m">6</span>
+</pre></div>
+
+
+<p>Notice how both options were set and took effect in the last command.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help 'number'</code> (notice the quotes).</p>
+<p>Read <code>:help relativenumber</code>.</p>
+<p>Read <code>:help numberwidth</code>.</p>
+<p>Read <code>:help wrap</code>.</p>
+<p>Read <code>:help shiftround</code>.</p>
+<p>Read <code>:help matchtime</code>.</p>
+<p>Add a few lines to your <code>~/.vimrc</code> file to set these options however you like.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/01.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/03.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="static/scripts/less.js"></script>
+    </head>
+
+    <body class="splash">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href=""></a></h1>
+            </header>
+
+            
+    <section class="content fourteen columns offset-by-one">
+        <p><a href="http://learnvimscriptthehardway.stevelosh.com/">Learn Vimscript the Hard Way</a> is a book for users of the <a href="http://www.vim.org/">Vim</a> editor
+who want to learn how to customize Vim.</p>
+<p>It is <em>not</em> a guide to <em>using</em> Vim.  Before reading this book you should be
+comfortable editing text in Vim and know what terms like "buffer", "window" and
+"insert mode" mean.</p>
+<p>The book is divided roughly into three sections:</p>
+<ul>
+<li>The first covers basic Vim commands that you can use in your <code>~/.vimrc</code> file
+  to customize Vim quickly and easily.</li>
+<li>The second looks more deeply at Vimscript as a programming language, covering
+  things like variables, comparisons, and functions.</li>
+<li>The third walks through the creation of a sample plugin intended for
+  distribution to other Vim users.</li>
+</ul>
+<p>The book is <a href="http://learnvimscriptthehardway.stevelosh.com/license.html">copyright</a> 2013 by Steve Losh, all rights reserved.  You
+can redistribute it as long as you don't make any changes and don't charge for
+it.</p>
+<p>The book will always be free to read online.</p>
+<p>You can buy an <a href="http://leanpub.org/learnvimscriptthehardway">ebook (PDF, epub, mobi) version</a> for $8 on Leanpub.</p>
+<p>You can buy a <a href="http://bit.ly/lvsthw-paperback">paperback copy</a> for $20 on Lulu.</p>
+<p>You can buy a <a href="http://bit.ly/lvsthw-hardcover">hardcover copy</a> for $40 on Lulu.</p>
+<p>The source code to the book is available <a href="http://bitbucket.org/sjl/learnvimscriptthehardway/">on BitBucket</a> and <a href="http://github.com/sjl/learnvimscriptthehardway/">on
+GitHub</a>.  If you find any mistakes or feel you could improve it feel free
+to send a pull request, but I'm retaining the copyright on the book, so if
+you're not comfortable with that I understand.</p>
+
+        <section class="toc">
+            <h2>Table of Contents</h2>
+
+            <ol class="pre-toc">
+                <li><a href="preface.html">Preface</a></li>
+                <li><a href="acknowledgements.html">Acknowledgements</a></li>
+            </ol>
+            <ol class="toc" start="0">
+                
+                    <li><a href="chapters/00.html">Prerequisites</a></li>
+                
+                    <li><a href="chapters/01.html">Echoing Messages</a></li>
+                
+                    <li><a href="chapters/02.html">Setting Options</a></li>
+                
+                    <li><a href="chapters/03.html">Basic Mapping</a></li>
+                
+                    <li><a href="chapters/04.html">Modal Mapping</a></li>
+                
+                    <li><a href="chapters/05.html">Strict Mapping</a></li>
+                
+                    <li><a href="chapters/06.html">Leaders</a></li>
+                
+                    <li><a href="chapters/07.html">Editing Your Vimrc</a></li>
+                
+                    <li><a href="chapters/08.html">Abbreviations</a></li>
+                
+                    <li><a href="chapters/09.html">More Mappings</a></li>
+                
+                    <li><a href="chapters/10.html">Training Your Fingers</a></li>
+                
+                    <li><a href="chapters/11.html">Buffer-Local Options and Mappings</a></li>
+                
+                    <li><a href="chapters/12.html">Autocommands</a></li>
+                
+                    <li><a href="chapters/13.html">Buffer-Local Abbreviations</a></li>
+                
+                    <li><a href="chapters/14.html">Autocommand Groups</a></li>
+                
+                    <li><a href="chapters/15.html">Operator-Pending Mappings</a></li>
+                
+                    <li><a href="chapters/16.html">More Operator-Pending Mappings</a></li>
+                
+                    <li><a href="chapters/17.html">Status Lines</a></li>
+                
+                    <li><a href="chapters/18.html">Responsible Coding</a></li>
+                
+                    <li><a href="chapters/19.html">Variables</a></li>
+                
+                    <li><a href="chapters/20.html">Variable Scoping</a></li>
+                
+                    <li><a href="chapters/21.html">Conditionals</a></li>
+                
+                    <li><a href="chapters/22.html">Comparisons</a></li>
+                
+                    <li><a href="chapters/23.html">Functions</a></li>
+                
+                    <li><a href="chapters/24.html">Function Arguments</a></li>
+                
+                    <li><a href="chapters/25.html">Numbers</a></li>
+                
+                    <li><a href="chapters/26.html">Strings</a></li>
+                
+                    <li><a href="chapters/27.html">String Functions</a></li>
+                
+                    <li><a href="chapters/28.html">Execute</a></li>
+                
+                    <li><a href="chapters/29.html">Normal</a></li>
+                
+                    <li><a href="chapters/30.html">Execute Normal!</a></li>
+                
+                    <li><a href="chapters/31.html">Basic Regular Expressions</a></li>
+                
+                    <li><a href="chapters/32.html">Case Study: Grep Operator, Part One</a></li>
+                
+                    <li><a href="chapters/33.html">Case Study: Grep Operator, Part Two</a></li>
+                
+                    <li><a href="chapters/34.html">Case Study: Grep Operator, Part Three</a></li>
+                
+                    <li><a href="chapters/35.html">Lists</a></li>
+                
+                    <li><a href="chapters/36.html">Looping</a></li>
+                
+                    <li><a href="chapters/37.html">Dictionaries</a></li>
+                
+                    <li><a href="chapters/38.html">Toggling</a></li>
+                
+                    <li><a href="chapters/39.html">Functional Programming</a></li>
+                
+                    <li><a href="chapters/40.html">Paths</a></li>
+                
+                    <li><a href="chapters/41.html">Creating a Full Plugin</a></li>
+                
+                    <li><a href="chapters/42.html">Plugin Layout in the Dark Ages</a></li>
+                
+                    <li><a href="chapters/43.html">A New Hope: Plugin Layout with Pathogen</a></li>
+                
+                    <li><a href="chapters/44.html">Detecting Filetypes</a></li>
+                
+                    <li><a href="chapters/45.html">Basic Syntax Highlighting</a></li>
+                
+                    <li><a href="chapters/46.html">Advanced Syntax Highlighting</a></li>
+                
+                    <li><a href="chapters/47.html">Even More Advanced Syntax Highlighting</a></li>
+                
+                    <li><a href="chapters/48.html">Basic Folding</a></li>
+                
+                    <li><a href="chapters/49.html">Advanced Folding</a></li>
+                
+                    <li><a href="chapters/50.html">Section Movement Theory</a></li>
+                
+                    <li><a href="chapters/51.html">Potion Section Movement</a></li>
+                
+                    <li><a href="chapters/52.html">External Commands</a></li>
+                
+                    <li><a href="chapters/53.html">Autoloading</a></li>
+                
+                    <li><a href="chapters/54.html">Documentation</a></li>
+                
+                    <li><a href="chapters/55.html">Distribution</a></li>
+                
+                    <li><a href="chapters/56.html">What Now?</a></li>
+                
+            </ol>
+        </section>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

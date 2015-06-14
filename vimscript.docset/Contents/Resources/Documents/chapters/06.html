@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Leaders / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#leaders">Leaders</a><ul>
+<li><a href="#mapping-key-sequences">Mapping Key Sequences</a></li>
+<li><a href="#leader">Leader</a></li>
+<li><a href="#local-leader">Local Leader</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/05.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/07.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="leaders">Leaders</h1>
+<p>We've learned how to map keys in a way that won't make us want to tear our hair
+out later, but you might have noticed one more problem.</p>
+<p>Every time we do something like <code>:nnoremap &lt;space&gt; dd</code> we've overwritten what
+<code>&lt;space&gt;</code> normally does.  What if we need that key later?</p>
+<p>There are a bunch of keys that you don't normally need in your day-to-day Vim
+usage.  <code>-</code>, <code>H</code>, <code>L</code>, <code>&lt;space&gt;</code>, <code>&lt;cr&gt;</code>, and <code>&lt;bs&gt;</code> do things that you almost
+never need (in normal mode, of course).  Depending on how you work you may find
+others that you never use.</p>
+<p>Those are safe to map, but that only gives us six keys to work with.  What
+happened to Vim's legendary customizability?</p>
+<h2 id="mapping-key-sequences">Mapping Key Sequences</h2>
+<p>Unlike Emacs, Vim makes it easy to map more than just single keys.  Run these
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">-</span><span class="k">d</span> dd
+<span class="p">:</span><span class="nb">nnoremap</span> <span class="p">-</span><span class="k">c</span> ddO
+</pre></div>
+
+
+<p>Try them out by typing <code>-d</code> and <code>-c</code> (quickly) in normal mode.  The first
+creates a custom mapping to delete a line, while the second "clears" a line and
+puts you into insert mode.</p>
+<p>This means you can pick a key that you don't care about (like <code>-</code>) as a "prefix"
+key and create mappings on top of it.  It means you'll have to type an extra key
+to activate the mappings, but one extra keystroke can easily be absorbed into
+muscle memory.</p>
+<p>If you think this might be a good idea, you're right, and it turns out that Vim
+already has mechanisms for this "prefix" key!</p>
+<h2 id="leader">Leader</h2>
+<p>Vim calls this "prefix" key the "leader".  You can set your leader key to
+whatever you like.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> mapleader <span class="p">=</span> <span class="s2">"-"</span>
+</pre></div>
+
+
+<p>You can replace <code>-</code> with any key you like.  I personally like <code>,</code> even though it
+shadows a useful function, because it's very easy to type.</p>
+<p>When you're creating new mappings you can use <code>&lt;leader&gt;</code> to mean "whatever
+I have my leader key set to".  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">d</span> dd
+</pre></div>
+
+
+<p>Now try it out by pressing your leader key and then <code>d</code>.  Vim will delete the
+current line.</p>
+<p>Why bother with setting <code>&lt;leader&gt;</code> at all, though?  Why not just include your
+"prefix" key directly in your mapping commands?  There are three good reasons.</p>
+<p>First of all, you may decide you need the normal function of your leader later
+on down the road.  Defining it in one place makes it easy to change later.</p>
+<p>Second, when someone else is looking at your <code>~/.vimrc</code> file they'll immediately
+know what you mean when you say <code>&lt;leader&gt;</code>.  They can simply copy your mapping
+into their own <code>~/.vimrc</code> if they like it even if they use a different leader.</p>
+<p>Finally, many Vim plugins create mappings that start with <code>&lt;leader&gt;</code>.  If you've
+already got it set up they'll work properly and will feel familiar right out of
+the box.</p>
+<h2 id="local-leader">Local Leader</h2>
+<p>Vim has a second "leader" key called "local leader".  This is meant to be
+a prefix for mappings that only take effect for certain types of files, like
+Python files or HTML files.</p>
+<p>We'll talk about how to make mappings for specific types of files later in the
+book, but you can go ahead and set your "localleader" now:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> maplocalleader <span class="p">=</span> <span class="s2">"\\"</span>
+</pre></div>
+
+
+<p>Notice that we have to use <code>\\</code> and not just <code>\</code> because <code>\</code> is the escape
+character in Vimscript strings.  You'll learn more about this later.</p>
+<p>Now you can use <code>&lt;localleader&gt;</code> in mappings and it will work just like
+<code>&lt;leader&gt;</code> does (except for resolving to a different key, of course).</p>
+<p>Feel free to change this key to something else if you don't like backslash.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help mapleader</code>.</p>
+<p>Read <code>:help maplocalleader</code>.</p>
+<p>Set <code>mapleader</code> and <code>maplocalleader</code> in your <code>~/.vimrc</code> file.</p>
+<p>Convert all the mappings you added to your <code>~/.vimrc</code> file in the previous
+chapters to be prefixed with <code>&lt;leader&gt;</code> so they don't shadow existing commands.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/05.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/07.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

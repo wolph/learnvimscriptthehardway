@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Case Study: Grep Operator, Part Two / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#case-study-grep-operator-part-two">Case Study: Grep Operator, Part Two</a><ul>
+<li><a href="#create-a-file">Create a File</a></li>
+<li><a href="#skeleton">Skeleton</a></li>
+<li><a href="#visual-mode">Visual Mode</a></li>
+<li><a href="#motion-types">Motion Types</a></li>
+<li><a href="#copying-the-text">Copying the Text</a></li>
+<li><a href="#escaping-the-search-term">Escaping the Search Term</a></li>
+<li><a href="#running-grep">Running Grep</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/32.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/34.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="case-study-grep-operator-part-two">Case Study: Grep Operator, Part Two</h1>
+<p>Now that we've got a preliminary sketch of our solution, it's time to flesh it
+out into something powerful.</p>
+<p>Remember: our original goal was to create a "grep operator".  There are a whole
+bunch of new things we need to cover to do this, but we're going to follow the
+same process we did in the last chapter: start with something simple and
+transform it until it does what you need.</p>
+<p>Before we start, comment out the mapping we creating the previous chapter from
+your <code>~/.vimrc</code> file -- we're going to use the same keystroke for our new
+operator.</p>
+<h2 id="create-a-file">Create a File</h2>
+<p>Creating an operator will take a number of commands and typing those out by
+hand will get tedious very quickly.  You could add it to your <code>~/.vimrc</code> file,
+but let's create a separate file just for this operator instead.  It's meaty
+enough to warrant a file of its own.</p>
+<p>First, find your Vim <code>plugin</code> directory.  On Linux or OS X this will be at
+<code>~/.vim/plugin</code>.  If you're on Windows it will be inside the <code>vimfiles</code>
+directory in your home directory. (Use the command: <code>:echo $HOME</code> in Vim if
+you're not sure where this is). If this directory doesn't exist, create it.</p>
+<p>Inside <code>plugin/</code> create a file named <code>grep-operator.vim</code>.  This is where you'll
+place the code for this new operator.  When you're editing the file you can run
+<code>:source %</code> to reload the code at any time.  This file will also be loaded each
+time you open Vim just like <code>~/.vimrc</code>.</p>
+<p>Remember that you <em>must</em> write the file before you source it for the changes to
+be seen!</p>
+<h2 id="skeleton">Skeleton</h2>
+<p>To create a new Vim operator you'll start with two components: a function and
+a mapping.  Start by adding the following code to <code>grep-operator.vim</code>:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">echom</span> <span class="s2">"Test"</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write the file and source it with <code>:source %</code>.  Try it out by pressing
+<code>&lt;leader&gt;giw</code> to say "grep inside word".  Vim will echo <code>Test</code> <em>after</em> accepting
+the <code>iw</code> motion, which means we've laid out the skeleton.</p>
+<p>The function is simple and nothing we haven't seen before, but that mapping is
+a bit more complicated.  First we set the <code>operatorfunc</code> option to our function,
+and then we run <code>g@</code> which calls this function as an operator.  This may seem
+a bit convoluted, but it's how Vim works.</p>
+<p>For now it's okay to consider this mapping to be black magic.  You can delve
+into the detailed documentation later.</p>
+<h2 id="visual-mode">Visual Mode</h2>
+<p>We've added the operator to normal mode, but we'll want to be able to use it
+from visual mode as well.  Add another mapping below the first:</p>
+<div class="codehilite"><pre><span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Write and source the file.  Now visually select something and press <code>&lt;leader&gt;g</code>.
+Nothing happens, but Vim does echo <code>Test</code>, so our function is getting called.</p>
+<p>We've seen the <code>&lt;c-u&gt;</code> in this mapping before but never explained what it did.
+Try visually selecting some text and pressing <code>:</code>.  Vim will open a command line
+as it usually does when <code>:</code> is pressed, but it automatically fills in <code>'&lt;,'&gt;</code> at
+the beginning of the line!</p>
+<p>Vim is trying to be helpful and inserts this text to make the command you're
+about to run function on the visually selected range.  In this case, however, we
+don't want the help.  We use <code>&lt;c-u&gt;</code> to say "delete from the cursor to the
+beginning of the line", removing the text.  This leaves us with a bare <code>:</code>,
+ready for the <code>call</code> command.</p>
+<p>The <code>call GrepOperator()</code> is simply a function call like we've seen before, but
+the <code>visualmode()</code> we're passing as an argument is new.  This function is
+a built-in Vim function that returns a one-character string representing the
+last type of visual mode used: <code>"v"</code> for characterwise, <code>"V"</code> for
+linewise, and a <code>Ctrl-v</code> character for blockwise.</p>
+<h2 id="motion-types">Motion Types</h2>
+<p>The function we defined takes a <code>type</code> argument.  We know that when we use the
+operator from visual mode it will be the result of <code>visualmode()</code>, but what
+about when we run it as an operator from normal mode?</p>
+<p>Edit the function body so the file looks like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">echom</span> <span class="k">a</span>:type
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Source the file, then go ahead and try it out in a variety of ways.  Some
+examples of the output you get are:</p>
+<ul>
+<li>Pressing <code>viw&lt;leader&gt;g</code> echoes <code>v</code> because we were in characterwise visual
+  mode.</li>
+<li>Pressing <code>Vjj&lt;leader&gt;g</code> echoes <code>V</code> because we were in linewise visual mode.</li>
+<li>Pressing <code>&lt;leader&gt;giw</code> echoes <code>char</code> because we used a characterwise motion
+  with the operator.</li>
+<li>Pressing <code>&lt;leader&gt;gG</code> echoes <code>line</code> because we used a linewise motion with the
+  operator.</li>
+</ul>
+<p>Now we know how we can tell the difference between motion types, which will be
+important when we select the text to search for.</p>
+<h2 id="copying-the-text">Copying the Text</h2>
+<p>Our function is going to need to somehow get access to the text the user wants
+to search for, and the easiest way to do that is to simply copy it.  Edit the
+function to look like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">if</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'v'</span>
+        execute <span class="s2">"normal! `&lt;v`&gt;y"</span>
+    <span class="k">elseif</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'char'</span>
+        execute <span class="s2">"normal! `[v`]y"</span>
+    <span class="k">else</span>
+        <span class="k">return</span>
+    <span class="k">endif</span>
+
+    <span class="k">echom</span> @@
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Wow.  That's a lot of new stuff.  Try it out by pressing things like
+<code>&lt;leader&gt;giw</code>, <code>&lt;leader&gt;g2e</code> and <code>vi(&lt;leader&gt;g</code>.  Each time Vim will echo the
+text that the motion covers, so clearly we're making progress!</p>
+<p>Let's break this new code down one step at a time.  First we have an <code>if</code>
+statement that checks the <code>a:type</code> argument.  If the type is <code>'v'</code> it was called
+from characterwise visual mode, so we do something to copy the visually-selected
+text.</p>
+<p>Notice that we use the case-sensitive comparison <code>==#</code>.  If we used plain <code>==</code>
+and the user has <code>ignorecase</code> set it would match <code>"V"</code> as well, which is <em>not</em>
+what we want.  Code defensively!</p>
+<p>The second case of the <code>if</code> fires if the operator was called from normal mode
+using a characterwise motion.</p>
+<p>The final case simply returns.  We explicitly ignore the cases of
+linewise/blockwise visual mode and linewise/blockwise motions.  Grep doesn't
+search across lines by default, so having a newline in the search pattern
+doesn't make any sense!</p>
+<p>Each of our two <code>if</code> cases runs a <code>normal!</code> command that does two
+things:</p>
+<ul>
+<li>Visually select the range of text we want by:<ul>
+<li>Moving to mark at the beginning of the range.</li>
+<li>Entering characterwise visual mode.</li>
+<li>Moving to the mark at the end of the range.</li>
+</ul>
+</li>
+<li>Yanking the visually selected text.</li>
+</ul>
+<p>Don't worry about the specific marks for now.  You'll learn why they need to be
+different when you complete the exercises at the end of this chapter.</p>
+<p>The final line of the function echoes the variable <code>@@</code>.  Remember that
+variables starting with an <code>@</code> are registers.  <code>@@</code> is the "unnamed" register:
+the one that Vim places text into when you yank or delete without specify
+a particular register.</p>
+<p>In a nutshell: we select the text to search for, yank it, then echo the yanked
+text.</p>
+<h2 id="escaping-the-search-term">Escaping the Search Term</h2>
+<p>Now that we've got the text we need in a Vim string we can escape it like we did
+in the previous chapter.  Modify the <code>echom</code> command so it looks like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">if</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'v'</span>
+        normal<span class="p">!</span> `<span class="p">&lt;</span><span class="k">v</span>`<span class="p">&gt;</span><span class="k">y</span>
+    <span class="k">elseif</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'char'</span>
+        normal<span class="p">!</span> `[<span class="k">v</span>`]<span class="k">y</span>
+    <span class="k">else</span>
+        <span class="k">return</span>
+    <span class="k">endif</span>
+
+    <span class="k">echom</span> shellescape<span class="p">(</span>@@<span class="p">)</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write and source the file and try it out by visually selecting some text with
+a special character in it and pressing <code>&lt;leader&gt;g</code>.  Vim will echo a version of
+the selected text suitable for passing to a shell command.</p>
+<h2 id="running-grep">Running Grep</h2>
+<p>We're finally ready to add the <code>grep!</code> command that will perform the actual
+search.  Replace the <code>echom</code> line so the code looks like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">if</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'v'</span>
+        normal<span class="p">!</span> `<span class="p">&lt;</span><span class="k">v</span>`<span class="p">&gt;</span><span class="k">y</span>
+    <span class="k">elseif</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'char'</span>
+        normal<span class="p">!</span> `[<span class="k">v</span>`]<span class="k">y</span>
+    <span class="k">else</span>
+        <span class="k">return</span>
+    <span class="k">endif</span>
+
+    <span class="k">silent</span> execute <span class="s2">"grep! -R "</span> . shellescape<span class="p">(</span>@@<span class="p">)</span> . <span class="s2">" ."</span>
+    <span class="k">copen</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>This should look familiar.  We simply execute the <code>silent execute "grep! ..."</code>
+command we came up with in the last chapter.  It's even more readable here
+because we're not trying to stuff the entire thing into a <code>nnoremap</code> command!</p>
+<p>Write and source the file, then try it out and enjoy the fruits of your labor!</p>
+<p>Because we've defined a brand new Vim operator we can use it in a lot of
+different ways, such as:</p>
+<ul>
+<li><code>viw&lt;leader&gt;g</code>: Visually select a word, then grep for it.</li>
+<li><code>&lt;leader&gt;g4w</code>: Grep for the next four words.</li>
+<li><code>&lt;leader&gt;gt;</code>: Grep until semicolon.</li>
+<li><code>&lt;leader&gt;gi[</code>: Grep inside square brackets.</li>
+</ul>
+<p>This highlights one of the best things about Vim: its editing commands are like
+a language.  When you add a new verb it automatically works with (most of) the
+existing nouns and adjectives.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help visualmode()</code>.</p>
+<p>Read <code>:help c_ctrl-u</code>.</p>
+<p>Read <code>:help operatorfunc</code>.</p>
+<p>Read <code>:help map-operator</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/32.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/34.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

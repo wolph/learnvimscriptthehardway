@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Variable Scoping / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#variable-scoping">Variable Scoping</a><ul>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/19.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/21.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="variable-scoping">Variable Scoping</h1>
+<p>So far Vimscript's variables may seem familiar if you come from a dynamic
+language like Python or Ruby.  For the most part variables act like you would
+expect, but Vim adds a certain twist to variables: scoping.</p>
+<p>Open two different files in separate splits, then go into one of them and run
+the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> <span class="k">b</span>:hello <span class="p">=</span> <span class="s2">"world"</span>
+<span class="p">:</span>echo <span class="k">b</span>:hello
+</pre></div>
+
+
+<p>As expected, Vim displays <code>world</code>.  Now switch to the other buffer and run the
+<code>echo</code> command again:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="k">b</span>:hello
+</pre></div>
+
+
+<p>This time Vim throws an error, saying it can't find the variable.</p>
+<p>When we used <code>b:</code> in the variable name we told Vim that the variable <code>hello</code>
+should be local to the current buffer.</p>
+<p>Vim has many different scopes for variables, but we need to learn a little more
+about Vimscript before we can take advantage of the rest.  For now, just
+remember that when you see a variable that start with a character and a colon
+that it's describing a scoped variable.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Skim over the list of scopes in <code>:help internal-variables</code>.  Don't worry if you
+don't know what some of them mean, just take a look and keep them in the back of
+your mind.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/19.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/21.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

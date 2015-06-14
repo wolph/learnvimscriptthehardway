@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Buffer-Local Abbreviations / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#buffer-local-abbreviations">Buffer-Local Abbreviations</a><ul>
+<li><a href="#autocommands-and-abbreviations">Autocommands and Abbreviations</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/12.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/14.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="buffer-local-abbreviations">Buffer-Local Abbreviations</h1>
+<p>That last chapter was a monster, so let's tackle something easier.  We've seen
+how to define buffer-local mappings and options, so let's apply the same idea to
+abbreviations.</p>
+<p>Open your <code>foo</code> and <code>bar</code> files again, switch to <code>foo</code>, and run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>iabbrev <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">---</span> &amp;mdash;
+</pre></div>
+
+
+<p>While still in <code>foo</code> enter insert mode and type the following text:</p>
+<div class="codehilite"><pre>Hello --- world.
+</pre></div>
+
+
+<p>Vim will replace the <code>---</code> for you.  Now switch to <code>bar</code> and try it.  It should
+be no surprise that it's not replaced, because we defined the abbreviation to be
+local to the <code>foo</code> buffer.</p>
+<h2 id="autocommands-and-abbreviations">Autocommands and Abbreviations</h2>
+<p>Let's pair up these buffer-local abbreviations with autocommands to set them to
+make ourselves a little "snippet" system.</p>
+<p>Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">FileType</span> python     :iabbrev <span class="p">&lt;</span>buffer<span class="p">&gt;</span> iff <span class="k">if</span>:<span class="p">&lt;</span><span class="k">left</span><span class="p">&gt;</span>
+<span class="p">:</span>autocmd <span class="nb">FileType</span> javascript :iabbrev <span class="p">&lt;</span>buffer<span class="p">&gt;</span> iff <span class="k">if</span> <span class="p">()&lt;</span><span class="k">left</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Open a Javascript file and try out the <code>iff</code> abbreviation.  Then open a Python
+file and try it there too.  Vim will perform the appropriate abbreviation
+depending on the type of the current file.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Create a few more "snippet" abbreviations for some of the things you type often
+in specific kinds of files.  Some good candidates are <code>return</code> for most
+languages, <code>function</code> for javascript, and things like <code>&amp;ldquo;</code> and <code>&amp;rdquo;</code>
+for HTML files.</p>
+<p>Add these snippets to your <code>~/.vimrc</code> file.</p>
+<p>Remember: the best way to learn to use these new snippets is to <em>disable</em> the
+old way of doing things.  Running <code>:iabbrev &lt;buffer&gt; return NOPENOPENOPE</code> will
+<em>force</em> you to use your abbreviation instead.  Add these "training" snippets to
+match all the ones you created to save time.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/12.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/14.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

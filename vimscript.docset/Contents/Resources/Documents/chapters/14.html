@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Autocommand Groups / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#autocommand-groups">Autocommand Groups</a><ul>
+<li><a href="#the-problem">The Problem</a></li>
+<li><a href="#grouping-autocommands">Grouping Autocommands</a></li>
+<li><a href="#clearing-groups">Clearing Groups</a></li>
+<li><a href="#using-autocommands-in-your-vimrc">Using Autocommands in Your Vimrc</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/13.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/15.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="autocommand-groups">Autocommand Groups</h1>
+<p>A few chapters ago we learned about autocommands.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Writing buffer!"</span>
+</pre></div>
+
+
+<p>Now write the current buffer with <code>:write</code> and run <code>:messages</code> to view the
+message log.  You should see the <code>Writing buffer!</code> message in the list.</p>
+<p>Now write the current buffer again and run <code>:messages</code> to view the message log.
+You should see the <code>Writing buffer!</code> message in the list twice.</p>
+<p>Now run the exact same autocommand again:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Writing buffer!"</span>
+</pre></div>
+
+
+<p>Write the current buffer one more time and run <code>:messages</code>.  You will see the
+<code>Writing buffer!</code> message in the list <em>four</em> times.  What happened?</p>
+<p>When you create an autocommand like this Vim has no way of knowing if you want
+it to replace an existing one.  In our case, Vim created two <em>separate</em>
+autocommands that each happen to do the same thing.</p>
+<h2 id="the-problem">The Problem</h2>
+<p>Now that you know it's possible to create duplicate autocommands, you may be
+thinking: "So what?  Just don't do that!"</p>
+<p>The problem is that sourcing your <code>~/.vimrc</code> file rereads the entire file,
+including any autocommands you've defined!  This means that every time you
+source your <code>~/.vimrc</code> you'll be duplicating autocommands, which will make Vim
+run slower because it executes the same commands over and over.</p>
+<p>To simulate this, try running the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :sleep <span class="m">200</span>m
+</pre></div>
+
+
+<p>Now write the current buffer.  You may or may not notice a slight sluggishness
+in Vim's writing time.  Now run the command three more times:</p>
+<div class="codehilite"><pre><span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :sleep <span class="m">200</span>m
+<span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :sleep <span class="m">200</span>m
+<span class="p">:</span>autocmd <span class="nb">BufWrite</span> * :sleep <span class="m">200</span>m
+</pre></div>
+
+
+<p>Write the file again.  This time the slowness will be more apparent.</p>
+<p>Obviously you won't have any autocommands that do nothing but sleep, but the
+<code>~/.vimrc</code> of a seasoned Vim user can easily reach 1,000 lines, many of which will
+be autocommands.  Combine that with autocommands defined in any installed
+plugins and it can definitely affect performance.</p>
+<h2 id="grouping-autocommands">Grouping Autocommands</h2>
+<p>Vim has a solution to the problem.  The first step is to group related
+autocommands into named groups. </p>
+<p>Open a fresh instance of Vim to clear out the autocommands from before, then run
+the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>augroup testgroup
+<span class="p">:</span>    autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Foo"</span>
+<span class="p">:</span>    autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Bar"</span>
+<span class="p">:</span>augroup END
+</pre></div>
+
+
+<p>The indentation in the middle two lines is insignificant.  You don't have to
+type it if you don't want to.</p>
+<p>Write a buffer and check <code>:messages</code>.  You should see both <code>Foo</code> and <code>Bar</code>.  Now
+run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>augroup testgroup
+<span class="p">:</span>    autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Baz"</span>
+<span class="p">:</span>augroup END
+</pre></div>
+
+
+<p>Try to guess what will happen when you write the buffer again.  Once you have
+a guess in mind, write the buffer and check <code>:messages</code> to see if you were
+correct.</p>
+<h2 id="clearing-groups">Clearing Groups</h2>
+<p>What happened when you wrote the file?  Was it what you expected?</p>
+<p>If you thought Vim would replace the group, you can see that you guessed
+wrong.  Don't worry, most people think the same thing at first (I know I did).</p>
+<p>When you use <code>augroup</code> multiple times Vim will <em>combine</em> the groups each time.</p>
+<p>If you want to <em>clear</em> a group you can use <code>autocmd!</code> inside the group.  Run the
+following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>augroup testgroup
+<span class="p">:</span>    autocmd<span class="p">!</span>
+<span class="p">:</span>    autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Cats"</span>
+<span class="p">:</span>augroup END
+</pre></div>
+
+
+<p>Now try writing your file and checking <code>:messages</code>.  This time Vim only echoed
+<code>Cats</code> when you wrote the file.</p>
+<h2 id="using-autocommands-in-your-vimrc">Using Autocommands in Your Vimrc</h2>
+<p>Now that we know how to group autocommands and clear those groups, we can use
+this to add autocommands to <code>~/.vimrc</code> that don't add a duplicate every time we
+source it.</p>
+<p>Add the following to your <code>~/.vimrc</code> file:</p>
+<div class="codehilite"><pre>augroup filetype_html
+    autocmd<span class="p">!</span>
+    autocmd <span class="nb">FileType</span> html <span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>localleader<span class="p">&gt;</span><span class="k">f</span> Vatzf
+augroup END
+</pre></div>
+
+
+<p>We enter the <code>filetype_html</code> group, immediately clear it, define an autocommand,
+and leave the group.  If we source <code>~/.vimrc</code> again the clearing will prevent
+Vim from adding duplicate autocommands.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Go through your <code>~/.vimrc</code> file and wrap <em>every</em> autocommand you have in groups
+like this.  You can put multiple autocommands in the same group if it makes
+sense to you.</p>
+<p>Try to figure out what the mapping in the last example does.</p>
+<p>Read <code>:help autocmd-groups</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/13.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/15.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

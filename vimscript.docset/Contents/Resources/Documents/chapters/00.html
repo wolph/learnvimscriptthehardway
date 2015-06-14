@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Prerequisites / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#prerequisites">Prerequisites</a><ul>
+<li><a href="#creating-a-vimrc-file">Creating a Vimrc File</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../acknowledgements.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/01.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="prerequisites">Prerequisites</h1>
+<p>To use this book you should have the latest version of Vim installed, which is
+version 7.3 at the time of this writing.  New versions of Vim are almost always
+backwards-compatible, so everything in this book should work fine with anything
+after 7.3 too.</p>
+<p>Nothing in this book is specific to console Vim or GUI Vims like gVim or MacVim.
+You can use whichever you prefer.</p>
+<p>You should be comfortable editing files in Vim.  You should know basic Vim
+terminology like "buffer", "window", "normal mode", "insert mode" and "text
+object".</p>
+<p>If you're not at that point yet you should go through the <code>vimtutor</code> program,
+use Vim exclusively for a month or two, and come back when you've got Vim burned
+into your fingers.</p>
+<p>You'll also need to have some programming experience.  If you've never
+programmed before check out <a href="http://learnpythonthehardway.org/">Learn Python the Hard
+Way</a> first and come back to this book when
+you're done.</p>
+<h2 id="creating-a-vimrc-file">Creating a Vimrc File</h2>
+<p>If you already know what a <code>~/.vimrc</code> file is and have one, go on to the next
+chapter.</p>
+<p>A <code>~/.vimrc</code> file is a file you create that contains some Vimscript code.  Vim
+will automatically run the code inside this file every time you open Vim.</p>
+<p>On Linux and Mac OS X this file is located in your home directory and named
+<code>.vimrc</code>.</p>
+<p>On Windows this file is located in your home folder and named <code>_vimrc</code>.</p>
+<p>To easily find the location and name of the file on <em>any</em> operating system, run
+<code>:echo $MYVIMRC</code> in Vim.  The path will be displayed at the bottom of the
+screen.</p>
+<p>Create this file if it doesn't already exist.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../acknowledgements.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/01.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

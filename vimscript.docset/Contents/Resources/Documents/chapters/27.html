@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>String Functions / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#string-functions">String Functions</a><ul>
+<li><a href="#length">Length</a></li>
+<li><a href="#splitting">Splitting</a></li>
+<li><a href="#joining">Joining</a></li>
+<li><a href="#lower-and-upper-case">Lower and Upper Case</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/26.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/28.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="string-functions">String Functions</h1>
+<p>Vim has many built-in functions to manipulate strings.  In this chapter we'll
+look at a few of the most important ones.</p>
+<h2 id="length">Length</h2>
+<p>The first function we'll look at is <code>strlen</code>.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> strlen<span class="p">(</span><span class="s2">"foo"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>3</code>, which is the length of the string <code>"foo"</code>.  Now try the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> len<span class="p">(</span><span class="s2">"foo"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim once again displays <code>3</code>.  When used with Strings <code>len</code> and <code>strlen</code> have
+identical effects.  We'll come back to <code>len</code> later in the book.</p>
+<h2 id="splitting">Splitting</h2>
+<p>Run the following command (note that it's an <code>echo</code> and not an <code>echom</code>):</p>
+<div class="codehilite"><pre><span class="p">:</span>echo split<span class="p">(</span><span class="s2">"one two three"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>['one', 'two', 'three']</code>.  The <code>split</code> function splits a String
+into a List.  We'll talk about Lists shortly, but for now don't worry too much
+about them.</p>
+<p>You can also tell Vim to use a separator other than "whitespace" for splitting.
+Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo split<span class="p">(</span><span class="s2">"one,two,three"</span><span class="p">,</span> <span class="s2">","</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will once again display <code>['one', 'two', 'three']</code>, because the second
+argument to <code>split</code> tells it to split the string on the comma character instead
+of on whitespace.</p>
+<h2 id="joining">Joining</h2>
+<p>Not only can you split strings, you can also join them.  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="k">join</span><span class="p">(</span>[<span class="s2">"foo"</span><span class="p">,</span> <span class="s2">"bar"</span>]<span class="p">,</span> <span class="s2">"..."</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display <code>foo...bar</code>.  Don't worry about the list syntax for now.</p>
+<p><code>split</code> and <code>join</code> can be paired to great effect.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="k">join</span><span class="p">(</span>split<span class="p">(</span><span class="s2">"foo bar"</span><span class="p">),</span> <span class="s2">";"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>foo;bar</code>.  First we split the string <code>"foo bar"</code> into a list, then
+we joined that list together using a semicolon as the separator.</p>
+<h2 id="lower-and-upper-case">Lower and Upper Case</h2>
+<p>Vim has two functions to change the case of Strings.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> tolower<span class="p">(</span><span class="s2">"Foo"</span><span class="p">)</span>
+<span class="p">:</span><span class="k">echom</span> toupper<span class="p">(</span><span class="s2">"Foo"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>foo</code> and <code>FOO</code>.  This should be pretty easy to understand.</p>
+<p>In many languages (like Python) a common idiom is to force strings to lowercase
+before comparing them to perform a case-insensitive comparison.  In Vimscript
+this isn't necessary because we have the case-insensitive comparison operators.
+Reread the chapter on comparisons if you don't remember those.</p>
+<p>It's up to you to decide whether to use <code>tolower</code> and <code>==#</code>, or just <code>==?</code> to
+perform case-sensitive comparisons.  There doesn't seem to be any strong
+preference in the Vimscript community.  Pick one and stick to it for all of your
+scripts.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Run <code>:echo split('1   2')</code> and <code>:echo split('1,,,2', ',')</code>.  Do they behave the
+same?</p>
+<p>Read <code>:help split()</code>.</p>
+<p>Read <code>:help join()</code>.</p>
+<p>Read <code>:help functions</code> and skim the list of built-in functions for ones that
+mention the word "String".  Use the <code>/</code> command to make it easier (remember,
+Vim's help files can be navigated like any other kind of file).  There are
+a <em>lot</em> of functions here, so don't feel like you need to read the documentation
+for every single one.  Just try to get an idea of what's available if you need
+it in the future.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/26.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/28.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

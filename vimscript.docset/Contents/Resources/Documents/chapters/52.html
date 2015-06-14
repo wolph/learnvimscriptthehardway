@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>External Commands / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#external-commands">External Commands</a><ul>
+<li><a href="#compiling">Compiling</a></li>
+<li><a href="#bang">Bang!</a></li>
+<li><a href="#displaying-bytecode">Displaying Bytecode</a></li>
+<li><a href="#system">system()</a></li>
+<li><a href="#scratch-splits">Scratch Splits</a></li>
+<li><a href="#exercises">Exercises</a></li>
+<li><a href="#extra-credit">Extra Credit</a></li>
+<li><a href="#more-extra-credit">More Extra Credit</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/51.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/53.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="external-commands">External Commands</h1>
+<p>Vim follows the UNIX philosophy of "do one thing well".  Instead of trying to
+cram all the functionality you could ever want inside the editor itself, the
+right way to use Vim is to delegate to external commands when appropriate.</p>
+<p>Let's add some interaction with the Potion compiler to our plugin to get our
+feet wet with external commands in Vim.</p>
+<h2 id="compiling">Compiling</h2>
+<p>First we'll add a command to compile and run the current Potion file.  There are
+a number of ways to do this, but we'll simply use an external command for now.</p>
+<p>Create a <code>potion/ftplugin/potion/running.vim</code> file in your plugin's repo.  This
+is where we'll create the mappings for compiling and running Potion files.</p>
+<div class="codehilite"><pre><span class="k">if</span> <span class="p">!</span>exists<span class="p">(</span><span class="s2">"g:potion_command"</span><span class="p">)</span>
+    <span class="k">let</span> <span class="k">g</span>:potion_command <span class="p">=</span> <span class="s2">"potion"</span>
+<span class="k">endif</span>
+
+<span class="k">function</span><span class="p">!</span> PotionCompileAndRunFile<span class="p">()</span>
+    <span class="k">silent</span> <span class="p">!</span>clear
+    execute <span class="s2">"!"</span> . <span class="k">g</span>:potion_command . <span class="s2">" "</span> . bufname<span class="p">(</span><span class="s2">"%"</span><span class="p">)</span>
+<span class="k">endfunction</span>
+
+<span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>localleader<span class="p">&gt;</span><span class="k">r</span> :<span class="k">call</span> PotionCompileAndRunFile<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>The first chunk stores the command used to execute Potion in a global variable,
+if that variable isn't already set.  We've seen this kind of check before.</p>
+<p>This will allow users to override it if <code>potion</code> isn't in their <code>$PATH</code> by
+putting a line like <code>let g:potion_command = "/Users/sjl/src/potion/potion"</code> in
+their <code>~/.vimrc</code> file.</p>
+<p>The last line adds a buffer-local mapping that calls a function we've defined
+above.  Remember that because this file is in the <code>ftdetect/potion</code> directory it
+will be run every time a file's <code>filetype</code> is set to <code>potion</code>.</p>
+<p>The real functionality is in the <code>PotionCompileAndRunFile()</code> function.  Go ahead
+and save this file, open up <code>factorial.pn</code> and press <code>&lt;localleader&gt;r</code> to run the
+mapping and see what happens.</p>
+<p>If <code>potion</code> is in your <code>$PATH</code>, the file should be run and you should see its
+output in your terminal (or at the bottom of the window if you're using a GUI
+Vim).  If you get an error about the <code>potion</code> command not being found, you'll
+need to set <code>g:potion_command</code> in your <code>~/.vimrc</code> file as mentioned above.</p>
+<p>Let's take a look at how <code>PotionCompileAndRunFile()</code> function works.</p>
+<h2 id="bang">Bang!</h2>
+<p>The <code>:!</code> command (pronounced "bang") in Vim runs external commands and displays
+their output on the screen.  Try it out by running the following command:</p>
+<div class="codehilite"><pre><span class="p">:!</span><span class="k">ls</span>
+</pre></div>
+
+
+<p>Vim should show you the output of the <code>ls</code> command, as well as a "Press ENTER or
+type command to continue" prompt.</p>
+<p>Vim doesn't pass any input to the command when run this way.  Confirm this by
+running:</p>
+<div class="codehilite"><pre><span class="p">:!</span><span class="k">cat</span>
+</pre></div>
+
+
+<p>Type a few lines and you'll see that the <code>cat</code> command spits them back out, just
+as it normally would if you ran <code>cat</code> outside of Vim.  Use Ctrl-D to finish.</p>
+<p>To run an external command without the <code>Press ENTER or type command to continue</code>
+prompt, use <code>:silent !</code>.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">silent</span> <span class="p">!</span>echo Hello<span class="p">,</span> world.
+</pre></div>
+
+
+<p>If you run this in a GUI Vim like MacVim or gVim, you won't see the <code>Hello,
+world.</code> output of the command.</p>
+<p>If you run it in a terminal Vim, your results may vary depending on your
+configuration.  You may need to run <code>:redraw!</code> to fix your screen after running
+a bare <code>:silent !</code>.</p>
+<p>Note that this command is <code>:silent !</code> and not <code>:silent!</code> (see the space?)!
+Those are two different commands, and we want the former!  Isn't Vimscript
+great?</p>
+<p>Let's look back at the <code>PotionCompileAndRun()</code> function:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> PotionCompileAndRunFile<span class="p">()</span>
+    <span class="k">silent</span> <span class="p">!</span>clear
+    execute <span class="s2">"!"</span> . <span class="k">g</span>:potion_command . <span class="s2">" "</span> . bufname<span class="p">(</span><span class="s2">"%"</span><span class="p">)</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>First we run a <code>silent !clear</code> command, which should clear the screen without
+a <code>Press ENTER...</code> prompt.  This will make sure we only see the output of this
+run, which is helpful when you're running the same commands over and over.</p>
+<p>The next line uses our old friend <code>execute</code> to build a command dynamically.  The
+command it builds will look something like this:</p>
+<div class="codehilite"><pre>!potion factorial.pn
+</pre></div>
+
+
+<p>Notice that there's no <code>silent</code> here, so the user will see the output of the
+command and will have to press enter to go back to Vim.  This is what we want
+for this particular mapping, so we're all set.</p>
+<h2 id="displaying-bytecode">Displaying Bytecode</h2>
+<p>The Potion compiler has an option that will let you view the bytecode it
+generates as it compiles.  This can be handy if you're trying to debug your
+program at a very low level.  Try it out by running the following command at
+a shell prompt:</p>
+<div class="codehilite"><pre>potion -c -V factorial.pn
+</pre></div>
+
+
+<p>You should see a lot of output that looks like this:</p>
+<div class="codehilite"><pre>-- parsed --
+code ...
+-- compiled --
+; function definition: 0x109d6e9c8 ; 108 bytes
+; () 3 registers
+.local factorial ; 0
+.local print_line ; 1
+.local print_factorial ; 2
+...
+[ 2] move     1 0
+[ 3] loadk    0 0   ; string
+[ 4] bind     0 1
+[ 5] loadpn   2 0   ; nil
+[ 6] call     0 2
+...
+</pre></div>
+
+
+<p>Let's add a mapping that will let the user view the bytecode generated for the
+current Potion file in a Vim split so they can easily navigate and examine it.</p>
+<p>First, add the following line to the bottom of <code>ftplugin/potion/running.vim</code>:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>localleader<span class="p">&gt;</span><span class="k">b</span> :<span class="k">call</span> PotionShowBytecode<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Nothing special there -- it's just a simple mapping.  Now let's sketch out the
+function that will do the work:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> PotionShowBytecode<span class="p">()</span>
+<span class="c">    " Get the bytecode.</span>
+
+<span class="c">    " Open a new split and set it up.</span>
+
+<span class="c">    " Insert the bytecode.</span>
+
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Now that we've got a little skeleton set up, let's talk about how to make it
+happen.</p>
+<h2 id="system">system()</h2>
+<p>There are a number of ways we could implement this, so I'll choose one that will
+come in handy later for you.</p>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> system<span class="p">(</span><span class="s2">"ls"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>You should see the output of the <code>ls</code> command at the bottom of your screen.  If
+you run <code>:messages</code> you'll see it there too.  The <code>system()</code> Vim function takes
+a command string as a parameter and returns the output of that command as
+a String.</p>
+<p>You can pass a second string as an argument to <code>system()</code>.  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> system<span class="p">(</span><span class="s2">"wc -c"</span><span class="p">,</span> <span class="s2">"abcdefg"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display <code>7</code> (with some padding).  If you pass a second argument like
+this, Vim will write it to a temporary file and pipe it into the command on
+standard input.  For our purposes we won't need this, but it's good to know.</p>
+<p>Back to our function.  Edit <code>PotionShowBytecode()</code> to fill out the first part of
+the skeleton like this:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> PotionShowBytecode<span class="p">()</span>
+<span class="c">    " Get the bytecode.</span>
+    <span class="k">let</span> bytecode <span class="p">=</span> system<span class="p">(</span><span class="k">g</span>:potion_command . <span class="s2">" -c -V "</span> . bufname<span class="p">(</span><span class="s2">"%"</span><span class="p">))</span>
+    <span class="k">echom</span> bytecode
+
+<span class="c">    " Open a new split and set it up.</span>
+
+<span class="c">    " Insert the bytecode.</span>
+
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Go ahead and try it out by saving the file, running <code>:set ft=potion</code> in
+<code>factorial.pn</code> to reload it, and using the <code>&lt;localleader&gt;b</code> mapping.  Vim should
+display the bytecode at the bottom of the screen.  Once you can see it's working
+you can remove the <code>echom</code> line.</p>
+<h2 id="scratch-splits">Scratch Splits</h2>
+<p>Next we're going to open up a new split window for the user to show the results.
+This will let the user view and navigate the bytecode with all the power of Vim,
+instead of just reading it once from the screen.</p>
+<p>To do this we're going to create a "scratch" split: a split containing a buffer
+that's never going to be saved and will be overwritten each time we run the
+mapping.  Change the <code>PotionShowBytecode()</code> function to look like this:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> PotionShowBytecode<span class="p">()</span>
+<span class="c">    " Get the bytecode.</span>
+    <span class="k">let</span> bytecode <span class="p">=</span> system<span class="p">(</span><span class="k">g</span>:potion_command . <span class="s2">" -c -V "</span> . bufname<span class="p">(</span><span class="s2">"%"</span><span class="p">))</span>
+
+<span class="c">    " Open a new split and set it up.</span>
+    <span class="k">vsplit</span> __Potion_Bytecode__
+    normal<span class="p">!</span> ggdG
+    <span class="k">setlocal</span> <span class="k">filetype</span><span class="p">=</span>potionbytecode
+    <span class="k">setlocal</span> <span class="nb">buftype</span><span class="p">=</span>nofile
+
+<span class="c">    " Insert the bytecode.</span>
+
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>These new command should be pretty easy to follow.</p>
+<p><code>vsplit</code> creates a new vertical split for a buffer named <code>__Potion_Bytecode__</code>.
+We surround the name with underscores to make it clearer to the user that this
+isn't a normal file (it's a buffer just to hold the output).  The underscores
+aren't special, they're just a convention.</p>
+<p>Next we delete everything in this buffer with <code>normal! ggdG</code>.  The first time
+the mapping is run this won't do anything, but subsequent times we'll be reusing
+the <code>__Potion_Bytecode__</code> buffer, so this clears it.</p>
+<p>Next we prepare the buffer by setting two local settings.  First we set its
+filetype to <code>potionbytecode</code>, just to make it clear what it's holding.  We also
+change the <code>buftype</code> setting to <code>nofile</code>, which tells Vim that this buffer isn't
+related to a file on disk and so it should never try to write it.</p>
+<p>All that's left is to dump the bytecode that we saved into the <code>bytecode</code>
+variable into this buffer.  Finish off the function by making it look like this:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> PotionShowBytecode<span class="p">()</span>
+<span class="c">    " Get the bytecode.</span>
+    <span class="k">let</span> bytecode <span class="p">=</span> system<span class="p">(</span><span class="k">g</span>:potion_command . <span class="s2">" -c -V "</span> . bufname<span class="p">(</span><span class="s2">"%"</span><span class="p">)</span> . <span class="s2">" 2&gt;&amp;1"</span><span class="p">)</span>
+
+<span class="c">    " Open a new split and set it up.</span>
+    <span class="k">vsplit</span> __Potion_Bytecode__
+    normal<span class="p">!</span> ggdG
+    <span class="k">setlocal</span> <span class="k">filetype</span><span class="p">=</span>potionbytecode
+    <span class="k">setlocal</span> <span class="nb">buftype</span><span class="p">=</span>nofile
+
+<span class="c">    " Insert the bytecode.</span>
+    <span class="k">call</span> append<span class="p">(</span><span class="m">0</span><span class="p">,</span> split<span class="p">(</span>bytecode<span class="p">,</span> <span class="s1">'\v\n'</span><span class="p">))</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>The <code>append()</code> Vim function takes two arguments: a line number to append after,
+and a list of Strings to append as lines.  For example, try running the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">call</span> append<span class="p">(</span><span class="m">3</span><span class="p">,</span> [<span class="s2">"foo"</span><span class="p">,</span> <span class="s2">"bar"</span>]<span class="p">)</span>
+</pre></div>
+
+
+<p>This will append two lines, <code>foo</code> and <code>bar</code>, below line 3 in your current
+buffer.  In this case we're appending below line 0, which means "at the top of
+the file".</p>
+<p>We need a list of Strings to append, but we just have a single string with
+newline characters embedded in it from when we used <code>system()</code>.  We use Vim's
+<code>split()</code> function to split that giant hunk of text into a list of Strings.
+<code>split()</code> takes a String to split and a regular expression to find the split
+points.  It's pretty simple.</p>
+<p>Now that the function is complete, go ahead and try out the mapping.  When you
+run <code>&lt;localleader&gt;b</code> in the <code>factorial.pn</code> buffer Vim will open a new buffer
+containing the Potion bytecode.  Play around with it by changing the source,
+saving the file, and running the mapping again to see the bytecode change.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help bufname</code>.</p>
+<p>Read <code>:help buftype</code>.</p>
+<p>Read <code>:help append()</code>.</p>
+<p>Read <code>:help split()</code>.</p>
+<p>Read <code>:help :!</code>.</p>
+<p>Read <code>:help :read</code> and <code>:help :read!</code> (we didn't cover these commands, but
+they're extremely useful).</p>
+<p>Read <code>:help system()</code>.</p>
+<p>Read <code>:help design-not</code>.</p>
+<p>Currently our mappings require that the user save the file themselves before
+running the mapping in order for their changes to take effect.  Undo is cheap
+these days, so edit the functions we wrote to save the current file for them.</p>
+<p>What happens when you run the bytecode mapping on a Potion file with a syntax
+error?  Why does that happen?</p>
+<p>Change the <code>PotionShowBytecode()</code> function to detect when the Potion compiler
+returns an error, and show an error message to the user.</p>
+<h2 id="extra-credit">Extra Credit</h2>
+<p>Each time you run the bytecode mapping a new vertical split will be created,
+even if the user hasn't closed the previous one.  If the user doesn't bother
+closing them they could end up with many extra windows stacked up.</p>
+<p>Change <code>PotionShowBytecode()</code> to detect with a window is already open for the
+<code>__Potion_Bytecode__</code> buffer, and when that's the case switch to it instead of
+creating a new split.</p>
+<p>You'll probably want to read <code>:help bufwinnr()</code> for this one.</p>
+<h2 id="more-extra-credit">More Extra Credit</h2>
+<p>Remember how we set the <code>filetype</code> of the temporary buffer to <code>potionbytecode</code>?
+Create a <code>syntax/potionbytecode.vim</code> file and define syntax highlighting for
+Potion bytecode buffers to make them easier to read.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/51.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/53.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

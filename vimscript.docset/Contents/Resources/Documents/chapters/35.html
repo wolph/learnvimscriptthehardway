@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Lists / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#lists">Lists</a><ul>
+<li><a href="#indexing">Indexing</a></li>
+<li><a href="#slicing">Slicing</a></li>
+<li><a href="#concatenation">Concatenation</a></li>
+<li><a href="#list-functions">List Functions</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/34.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/36.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="lists">Lists</h1>
+<p>We've worked a lot with variables so far, but we haven't talked about aggregates
+at all yet!  Vim has two main aggregate types, and we'll look at the first now:
+lists.</p>
+<p>Vimscript lists are ordered, heterogeneous collections of elements.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'foo'</span><span class="p">,</span> <span class="m">3</span><span class="p">,</span> <span class="s1">'bar'</span>]
+</pre></div>
+
+
+<p>Vim displays the list.  Lists can of course be nested.  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'foo'</span><span class="p">,</span> [<span class="m">3</span><span class="p">,</span> <span class="s1">'bar'</span>]]
+</pre></div>
+
+
+<p>Vim happily displays the list.</p>
+<h2 id="indexing">Indexing</h2>
+<p>Vimscript lists are zero-indexed, and you can get at the elements in the usual
+way.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="m">0</span><span class="p">,</span> [<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]][<span class="m">1</span>]
+</pre></div>
+
+
+<p>Vim displays <code>[1, 2]</code>.  You can also index from the end of the list, much like
+Python.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="m">0</span><span class="p">,</span> [<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]][<span class="m">-2</span>]
+</pre></div>
+
+
+<p>Vim displays <code>0</code>.  The index <code>-1</code> refers to the last element in the list, <code>-2</code>
+is the second-to-last, and so on.</p>
+<h2 id="slicing">Slicing</h2>
+<p>Vim lists can also be sliced.  This will <em>look</em> familiar to Python programmers,
+but it does <em>not</em> always act the same way!  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'e'</span>][<span class="m">0</span>:<span class="m">2</span>]
+</pre></div>
+
+
+<p>Vim displays <code>['a', 'b', 'c']</code> (elements 0, 1 and 2).  You can safely exceed the
+upper bound as well.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'e'</span>][<span class="m">0</span>:<span class="m">100000</span>]
+</pre></div>
+
+
+<p>Vim simply displays the entire list.</p>
+<p>Slice indexes can be negative.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'e'</span>][<span class="m">-2</span>:<span class="m">-1</span>]
+</pre></div>
+
+
+<p>Vim displays <code>['d', 'e']</code> (elements -2 and -1).</p>
+<p>When slicing lists you can leave off the first index to mean "the beginning"
+and/or the last index to mean "the end".  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'e'</span>][:<span class="m">1</span>]
+<span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span><span class="p">,</span> <span class="s1">'d'</span><span class="p">,</span> <span class="s1">'e'</span>][<span class="m">3</span>:]
+</pre></div>
+
+
+<p>Vim displays <code>['a', 'b']</code> and <code>['d', 'e']</code>.</p>
+<p>Like Python, Vimscript allows you to index and slice strings too.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="s2">"abcd"</span>[<span class="m">0</span>:<span class="m">2</span>]
+</pre></div>
+
+
+<p>Vim displays <code>abc</code>. However, you can't use negative bare indices with strings.
+You <em>can</em> use negative indices when slicing strings though!  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="s2">"abcd"</span>[<span class="m">-1</span>] . <span class="s2">"abcd"</span>[<span class="m">-2</span>:]
+</pre></div>
+
+
+<p>Vim displays <code>cd</code> (using a negative index silently resulted in an empty string).</p>
+<h2 id="concatenation">Concatenation</h2>
+<p>You can combine Vim lists with <code>+</code>.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo [<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span>] <span class="p">+</span> [<span class="s1">'c'</span>]
+</pre></div>
+
+
+<p>Vim, unsurprisingly, displays <code>['a', 'b', 'c']</code>.  There's not much else to say
+here -- Vimscript lists are surprisingly sane compared to the rest of the
+language.</p>
+<h2 id="list-functions">List Functions</h2>
+<p>Vim has a number of built-in functions for working with lists.  Run these
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> foo <span class="p">=</span> [<span class="s1">'a'</span>]
+<span class="p">:</span><span class="k">call</span> add<span class="p">(</span>foo<span class="p">,</span> <span class="s1">'b'</span><span class="p">)</span>
+<span class="p">:</span>echo foo
+</pre></div>
+
+
+<p>Vim mutates the list <code>foo</code> in-place to append <code>'b'</code> and displays <code>['a', 'b']</code>.
+Now run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo len<span class="p">(</span>foo<span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>2</code>, the length of the list.  Try these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo get<span class="p">(</span>foo<span class="p">,</span> <span class="m">0</span><span class="p">,</span> <span class="s1">'default'</span><span class="p">)</span>
+<span class="p">:</span>echo get<span class="p">(</span>foo<span class="p">,</span> <span class="m">100</span><span class="p">,</span> <span class="s1">'default'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>a</code> and <code>default</code>.  The <code>get</code> function will get the item at the
+given index from the given list, or return the given default value if the index
+is out of range in the list.</p>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo index<span class="p">(</span>foo<span class="p">,</span> <span class="s1">'b'</span><span class="p">)</span>
+<span class="p">:</span>echo index<span class="p">(</span>foo<span class="p">,</span> <span class="s1">'nope'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>1</code> and <code>-1</code>.  The <code>index</code> function returns the first index of the
+given item in the given list, or <code>-1</code> if the item is not in the list.</p>
+<p>Now run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="k">join</span><span class="p">(</span>foo<span class="p">)</span>
+<span class="p">:</span>echo <span class="k">join</span><span class="p">(</span>foo<span class="p">,</span> <span class="s1">'---'</span><span class="p">)</span>
+<span class="p">:</span>echo <span class="k">join</span><span class="p">(</span>[<span class="m">1</span><span class="p">,</span> <span class="m">2</span><span class="p">,</span> <span class="m">3</span>]<span class="p">,</span> <span class="s1">''</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>a b</code>, <code>a---b</code>, and <code>123</code>.  <code>join</code> will join the items in the given
+list together into a string, separated by the given separator string (or a space
+if none is given), coercing each item to a string if necessary/possible.</p>
+<p>Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">call</span> reverse<span class="p">(</span>foo<span class="p">)</span>
+<span class="p">:</span>echo foo
+<span class="p">:</span><span class="k">call</span> reverse<span class="p">(</span>foo<span class="p">)</span>
+<span class="p">:</span>echo foo
+</pre></div>
+
+
+<p>Vim displays <code>['b', 'a']</code> and then <code>['a', 'b']</code>.  <code>reverse</code> reverses the given
+list <em>in place</em>.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help List</code>.  All of it.  Notice the capital <code>L</code>.</p>
+<p>Read <code>:help add()</code>.</p>
+<p>Read <code>:help len()</code>.</p>
+<p>Read <code>:help get()</code>.</p>
+<p>Read <code>:help index()</code>.</p>
+<p>Read <code>:help join()</code>.</p>
+<p>Read <code>:help reverse()</code>.</p>
+<p>Skim <code>:help functions</code> to find some other list-related functions I haven't
+mentioned yet.  Run <code>:match Keyword /\clist/</code> to case-insensitively highlight
+the word <code>list</code> to make it easier to find what you're looking for.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/34.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/36.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

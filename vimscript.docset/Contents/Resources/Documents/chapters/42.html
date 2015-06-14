@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Plugin Layout in the Dark Ages / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#plugin-layout-in-the-dark-ages">Plugin Layout in the Dark Ages</a><ul>
+<li><a href="#basic-layout">Basic Layout</a></li>
+<li><a href="#vimcolors">~/.vim/colors/</a></li>
+<li><a href="#vimplugin">~/.vim/plugin/</a></li>
+<li><a href="#vimftdetect">~/.vim/ftdetect/</a></li>
+<li><a href="#vimftplugin">~/.vim/ftplugin/</a></li>
+<li><a href="#vimindent">~/.vim/indent/</a></li>
+<li><a href="#vimcompiler">~/.vim/compiler/</a></li>
+<li><a href="#vimafter">~/.vim/after/</a></li>
+<li><a href="#vimautoload">~/.vim/autoload/</a></li>
+<li><a href="#vimdoc">~/.vim/doc/</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/41.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/43.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="plugin-layout-in-the-dark-ages">Plugin Layout in the Dark Ages</h1>
+<p>The first thing we need to talk about is how to structure our plugin.  In the
+past this was a messy affair, but now there's a tool that makes the process of
+installing Vim plugins much, <em>much</em> saner.</p>
+<p>We need to go over the basic layout first, then we'll talk about how to restore
+our sanity.</p>
+<h2 id="basic-layout">Basic Layout</h2>
+<p>Vanilla Vim supports splitting plugins into multiple files.  There are a number
+of different directories you can create under <code>~/.vim</code> that mean various things.</p>
+<p>We'll cover the most important directories now, but don't stress out too much
+about them.  We'll go over them one at a time as we create our Potion plugin.</p>
+<p>Before we continue we need to talk about some vocabulary.</p>
+<p>I've been using the word "plugin" to mean "a big ol' hunk of Vimscript that does
+a bunch of related stuff".  Vim has a more specific meaning of "plugin", which
+is "a file in <code>~/.vim/plugins/</code>".</p>
+<p>Most of the time I'll be using the first definition.  I'll try to be clear when
+I mean the second.</p>
+<h2 id="vimcolors">~/.vim/colors/</h2>
+<p>Files inside <code>~/.vim/colors/</code> are treated as color schemes.  For example: if you
+run <code>:color mycolors</code> Vim will look for a file at <code>~/.vim/colors/mycolors.vim</code>
+and run it.  That file should contain all the Vimscript commands necessary to
+generate your color scheme.</p>
+<p>We're not going to cover color schemes in this book.  If you want to create your
+own you should copy an existing scheme and modify it.  Remember that <code>:help</code> is
+your friend.</p>
+<h2 id="vimplugin">~/.vim/plugin/</h2>
+<p>Files inside <code>~/.vim/plugin/</code> will each be run once <em>every time</em> Vim starts.
+These files are meant to contain code that you always want loaded whenever you
+start Vim.</p>
+<h2 id="vimftdetect">~/.vim/ftdetect/</h2>
+<p>Any files in <code>~/.vim/ftdetect/</code> will <em>also</em> be run every time you start Vim.</p>
+<p><code>ftdetect</code> stands for "filetype detection".  The files in this directory should
+set up autocommands that detect and set the <code>filetype</code> of files, and <em>nothing
+else</em>.  This means they should never be more than one or two lines long.</p>
+<h2 id="vimftplugin">~/.vim/ftplugin/</h2>
+<p>Files in <code>~/.vim/ftplugin/</code> are different.</p>
+<p>The naming of these files matters!  When Vim sets a buffer's <code>filetype</code> to
+a value it then looks for a file in <code>~/.vim/ftplugin/</code> that matches.  For
+example: if you run <code>set filetype=derp</code> Vim will look for
+<code>~/.vim/ftplugin/derp.vim</code>.  If that file exists, it will run it.</p>
+<p>Vim also supports directories inside <code>~/.vim/ftplugin/</code>.  To continue our
+example: <code>set filetype=derp</code> will also make Vim run any and all <code>*.vim</code> files
+inside <code>~/.vim/ftplugin/derp/</code>.  This lets you split up your plugin's <code>ftplugin</code>
+files into logical groups.</p>
+<p>Because these files are run every time a buffer's <code>filetype</code> is set they <em>must</em>
+only set buffer-local options!  If they set options globally they would
+overwrite them for all open buffers!</p>
+<h2 id="vimindent">~/.vim/indent/</h2>
+<p>Files in <code>~/.vim/indent/</code> are a lot like <code>ftplugin</code> files.  They get loaded
+based on their names.</p>
+<p><code>indent</code> files should set options related to indentation for their filetypes,
+and those options should be buffer-local.</p>
+<p>Yes, you could simply put this code in the <code>ftplugin</code> files, but it's better to
+separate it out so other Vim users will understand what you're doing.  It's just
+a convention, but please be a considerate plugin author and follow it.</p>
+<h2 id="vimcompiler">~/.vim/compiler/</h2>
+<p>Files in <code>~/.vim/compiler/</code> work exactly like <code>indent</code> files.  They should set
+compiler-related options in the current buffer based on their names.</p>
+<p>Don't worry about what "compiler-related options" means right now.  We'll cover
+that later.</p>
+<h2 id="vimafter">~/.vim/after/</h2>
+<p>The <code>~/.vim/after/</code> directory is a bit of a hack.  Files in this directory will
+be loaded every time Vim starts, but <em>after</em> the files in <code>~/.vim/plugin/</code>.</p>
+<p>This allows you to override Vim's internal files.  In practice you'll rarely
+need this, so don't worry about it until you find yourself thinking "Vim itself
+sets option <code>x</code>, but I want something different".</p>
+<h2 id="vimautoload">~/.vim/autoload/</h2>
+<p>The <code>~/.vim/autoload/</code> directory is an incredibly important hack.  It sounds
+a lot more complicated than it actually is.</p>
+<p>In a nutshell: <code>autoload</code> is a way to delay the loading of your plugin's code
+until it's actually needed.  We'll cover this in more detail later when we
+refactor our plugin's code to take advantage of it.</p>
+<h2 id="vimdoc">~/.vim/doc/</h2>
+<p>Finally, the <code>~/.vim/doc/</code> directory is where you can add documentation for your
+plugin.  Vim has a huge focus on documentation (as evidenced by all the <code>:help</code>
+commands we've been running) so it's important to document your plugins.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Reread this chapter.  I'm not kidding.  Make sure you understand (in a very
+rough way) what each directory we've talked about does.</p>
+<p>For extra credit, find some Vim plugins you use and look at how they structure
+their files.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/41.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/43.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

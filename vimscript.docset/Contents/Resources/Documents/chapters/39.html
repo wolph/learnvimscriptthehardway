@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Functional Programming / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#functional-programming">Functional Programming</a><ul>
+<li><a href="#immutable-data-structures">Immutable Data Structures</a></li>
+<li><a href="#functions-as-variables">Functions as Variables</a></li>
+<li><a href="#higher-order-functions">Higher-Order Functions</a></li>
+<li><a href="#performance">Performance</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/38.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/40.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="functional-programming">Functional Programming</h1>
+<p>We're going to take a short break now to talk about a style of programming you
+may have heard of: <a href="https://secure.wikimedia.org/wikipedia/en/wiki/Functional_programming">functional programming</a>.</p>
+<p>If you've programmed in languages like Python, Ruby or Javascript, or
+<em>especially</em> Lisp, Scheme, Clojure or Haskell, you're probably familiar with the
+idea of using functions as variables and using data structures with immutable
+state.  If you've never done this before you can safely skip this chapter, but
+I'd encourage you to try it anyway and broaden your horizons!</p>
+<p>Vimscript has all the pieces necessary to program in a kind-of-functional style,
+but it's a bit clunky.  We can create a few helpers that will make it less
+painful though.</p>
+<p>Go ahead and create a <code>functional.vim</code> file somewhere so you don't have to keep
+typing everything over and over.  This file will be our scratchpad for this
+chapter.</p>
+<h2 id="immutable-data-structures">Immutable Data Structures</h2>
+<p>Unfortunately Vim doesn't have any immutable collections like Clojure's vectors
+and maps built-in, but by creating some helper functions we can fake it to some
+degree.</p>
+<p>Add the following function to your file:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> Sorted<span class="p">(</span><span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> <span class="k">sort</span><span class="p">(</span>new_list<span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Source and write the file, then run <code>:echo Sorted([3, 2, 4, 1])</code> to try it out.
+Vim echoes <code>[1, 2, 3, 4]</code>.</p>
+<p>How is this different from simply calling the built-in <code>sort()</code> function?  The
+key is the first line: <code>let new_list = deepcopy(a:l)</code>.  Vim's <code>sort()</code> sorts the
+list <em>in place</em>, so we first create a full copy of the list and sort <em>that</em> so
+the original list won't be changed.</p>
+<p>This prevents side effects and helps us write code that is easier to reason
+about and test.  Let's add a few more helper functions in this same style:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> Reversed<span class="p">(</span><span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> reverse<span class="p">(</span>new_list<span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+
+<span class="k">function</span><span class="p">!</span> Append<span class="p">(</span><span class="k">l</span><span class="p">,</span> val<span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> add<span class="p">(</span>new_list<span class="p">,</span> <span class="k">a</span>:val<span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+
+<span class="k">function</span><span class="p">!</span> Assoc<span class="p">(</span><span class="k">l</span><span class="p">,</span> <span class="k">i</span><span class="p">,</span> val<span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list[<span class="k">a</span>:<span class="k">i</span>] <span class="p">=</span> <span class="k">a</span>:val
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+
+<span class="k">function</span><span class="p">!</span> Pop<span class="p">(</span><span class="k">l</span><span class="p">,</span> <span class="k">i</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> remove<span class="p">(</span>new_list<span class="p">,</span> <span class="k">a</span>:<span class="k">i</span><span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Each of these functions is exactly the same except for the middle line and the
+arguments they take.  Source and write the file and try them out on a few lists.</p>
+<p><code>Reversed()</code> takes a list and returns a new list with the elements reversed.</p>
+<p><code>Append()</code> returns a new list with the given value appended to the end of the
+old one.</p>
+<p><code>Assoc()</code> (short for "associate") returns a new list, with the element at the
+given index replaced by the new value.</p>
+<p><code>Pop()</code> returns a new list with the element at the given index removed.</p>
+<h2 id="functions-as-variables">Functions as Variables</h2>
+<p>Vimscript supports using variables to store functions, but the syntax is a bit
+obtuse.  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> Myfunc <span class="p">=</span> <span class="k">function</span><span class="p">(</span><span class="s2">"Append"</span><span class="p">)</span>
+<span class="p">:</span>echo Myfunc<span class="p">(</span>[<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]<span class="p">,</span> <span class="m">3</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display <code>[1, 2, 3]</code> as expected.  Notice that the variable we used
+started with a capital letter.  If a Vimscript variable refers to a function it
+must start with a capital letter.</p>
+<p>Functions can be stored in lists just like any other kind of variable.  Run the
+following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> funcs <span class="p">=</span> [<span class="k">function</span><span class="p">(</span><span class="s2">"Append"</span><span class="p">),</span> <span class="k">function</span><span class="p">(</span><span class="s2">"Pop"</span><span class="p">)</span>]
+<span class="p">:</span>echo funcs[<span class="m">1</span>]<span class="p">(</span>[<span class="s1">'a'</span><span class="p">,</span> <span class="s1">'b'</span><span class="p">,</span> <span class="s1">'c'</span>]<span class="p">,</span> <span class="m">1</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>['a', 'c']</code>.  The <code>funcs</code> variable does <em>not</em> need to start with
+a capital letter because it's storing a list, not a function.  The contents of
+the list don't matter at all.</p>
+<h2 id="higher-order-functions">Higher-Order Functions</h2>
+<p>Let's create a few of the most commonly-used higher-order functions.  If you're
+not familiar with that term, higher-order functions are functions that take
+<em>other</em> functions and do something with them.</p>
+<p>We'll begin with the trusty <code>map</code> function.  Add this to your file:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> Mapped<span class="p">(</span>fn<span class="p">,</span> <span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> map<span class="p">(</span>new_list<span class="p">,</span> string<span class="p">(</span><span class="k">a</span>:fn<span class="p">)</span> . <span class="s1">'(v:val)'</span><span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Source and write the file, and try it out by running the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> mylist <span class="p">=</span> [[<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]<span class="p">,</span> [<span class="m">3</span><span class="p">,</span> <span class="m">4</span>]]
+<span class="p">:</span>echo Mapped<span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="s2">"Reversed"</span><span class="p">),</span> mylist<span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>[[2, 1], [4, 3]]</code>, which is the result of applying <code>Reversed()</code> to
+every element in the list.</p>
+<p>How does <code>Mapped()</code> work?  Once again we create a fresh list with <code>deepcopy()</code>,
+do something to it, and return the modified copy -- nothing new there.  The
+tricky part is the middle.</p>
+<p><code>Mapped()</code> takes two arguments: a funcref (Vim's term for "variable holding
+a function") and a list.  We use the built-in <code>map()</code> function to perform the
+actual work.  Read <code>:help map()</code> now to see how it works.</p>
+<p>Now we'll create a few other common higher-order functions.  Add the following
+to your file:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> Filtered<span class="p">(</span>fn<span class="p">,</span> <span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> filter<span class="p">(</span>new_list<span class="p">,</span> string<span class="p">(</span><span class="k">a</span>:fn<span class="p">)</span> . <span class="s1">'(v:val)'</span><span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Try <code>Filtered()</code> out with the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> mylist <span class="p">=</span> [[<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]<span class="p">,</span> []<span class="p">,</span> [<span class="s1">'foo'</span>]<span class="p">,</span> []]
+<span class="p">:</span>echo Filtered<span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="s1">'len'</span><span class="p">),</span> mylist<span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>[[1, 2], ['foo']]</code>.</p>
+<p><code>Filtered()</code> takes a predicate function and a list.  It returns a copy of the
+list that contains only the elements of the original where the result of calling
+the function on it is "truthy".  In this case we use the built-in <code>len()</code>
+function, so it filters out all the elements whose length is zero.</p>
+<p>Finally we'll create the counterpart to <code>Filtered()</code>:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> Removed<span class="p">(</span>fn<span class="p">,</span> <span class="k">l</span><span class="p">)</span>
+    <span class="k">let</span> new_list <span class="p">=</span> deepcopy<span class="p">(</span><span class="k">a</span>:<span class="k">l</span><span class="p">)</span>
+    <span class="k">call</span> filter<span class="p">(</span>new_list<span class="p">,</span> <span class="s1">'!'</span> . string<span class="p">(</span><span class="k">a</span>:fn<span class="p">)</span> . <span class="s1">'(v:val)'</span><span class="p">)</span>
+    <span class="k">return</span> new_list
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Try it out just like we did with <code>Filtered()</code>:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">let</span> mylist <span class="p">=</span> [[<span class="m">1</span><span class="p">,</span> <span class="m">2</span>]<span class="p">,</span> []<span class="p">,</span> [<span class="s1">'foo'</span>]<span class="p">,</span> []]
+<span class="p">:</span>echo Removed<span class="p">(</span><span class="k">function</span><span class="p">(</span><span class="s1">'len'</span><span class="p">),</span> mylist<span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>[[], []]</code>.  <code>Removed()</code> is like <code>Filtered()</code> except it only keeps
+elements where the predicate function does <em>not</em> return something truthy.</p>
+<p>The only difference in the code is the single <code>'!' .</code> we added to the call
+command, which negates the result of the predicate.</p>
+<h2 id="performance">Performance</h2>
+<p>You might be thinking that copying lists all over the place is wasteful, since
+Vim has to constantly create new copies and garbage collect old ones.</p>
+<p>If so: you're right!  Vim's lists don't support the same kind of structural
+sharing as Clojure's vectors, so all those copy operations can be expensive.</p>
+<p>Sometimes this will matter.  If you're working with enormous lists, things can
+slow down.  In real life, though, you might be surprised at how little you'll
+actually notice the difference.</p>
+<p>Consider this: as I'm writing this chapter my Vim program is using about 80
+megabytes of memory (and I have a <em>lot</em> of plugins installed).  My laptop has
+8 <em>gigabytes</em> of memory in it.  Is the overhead of having a few copies of a list
+around really going to make a noticeable difference?  Of course that depends on
+the size of the list, but in most cases the answer will be "no".</p>
+<p>To contrast, my Firefox instance with five tabs open is currently using 1.22
+<em>gigabytes</em> of RAM.</p>
+<p>You'll need to use your own judgement about when this style of programming
+creates unacceptably bad performance.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help sort()</code>.</p>
+<p>Read <code>:help reverse()</code>.</p>
+<p>Read <code>:help copy()</code>.</p>
+<p>Read <code>:help deepcopy()</code>.</p>
+<p>Read <code>:help map()</code> if you haven't already.</p>
+<p>Read <code>:help function()</code>.</p>
+<p>Modify <code>Assoc()</code>, <code>Pop()</code>, <code>Mapped()</code>, <code>Filtered()</code> and <code>Removed()</code> to support
+dictionaries.  You'll probably need <code>:help type()</code> for this.</p>
+<p>Implement <code>Reduced()</code>.</p>
+<p>Pour yourself a glass of your favorite drink.  This chapter was intense!</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/38.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/40.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

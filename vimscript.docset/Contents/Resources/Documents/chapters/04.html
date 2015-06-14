@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Modal Mapping / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#modal-mapping">Modal Mapping</a><ul>
+<li><a href="#muscle-memory">Muscle Memory</a></li>
+<li><a href="#insert-mode">Insert Mode</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/03.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/05.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="modal-mapping">Modal Mapping</h1>
+<p>In the last chapter we talked about how to map keys in Vim.  We used the <code>map</code>
+command which made the keys work in normal mode.  If you played around a bit
+before moving on to this chapter, you may have noticed that the mappings also
+took effect in visual mode.</p>
+<p>You can be more specific about when you want mappings to apply by using <code>nmap</code>,
+<code>vmap</code>, and <code>imap</code>.  These tell Vim to only use the mapping in normal, visual,
+or insert mode respectively.</p>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>nmap \ dd
+</pre></div>
+
+
+<p>Now put your cursor in your text file, make sure you're in normal mode, and
+press <code>\</code>.  Vim will delete the current line.</p>
+<p>Now enter visual mode and try pressing <code>\</code>.  Nothing will happen, because we
+told Vim to only use that mapping in normal mode (and <code>\</code> doesn't do anything by
+default).</p>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>vmap \ U
+</pre></div>
+
+
+<p>Enter visual mode and select some text, then press <code>\</code>.  Vim will convert the
+text to uppercase!</p>
+<p>Try the <code>\</code> key a few times in normal and visual modes and notice that it now
+does something completely different depending on which mode you're in.</p>
+<h2 id="muscle-memory">Muscle Memory</h2>
+<p>At first the idea of mapping the same key to do different things depending on
+which mode you're in may sound like a terrible idea.  Why would you want to
+have to stop and think which mode you're in before pressing the key?  Wouldn't
+that negate any time you save from the mapping itself?</p>
+<p>In practice it turns out that this isn't really a problem.  Once you start using
+Vim often you won't be thinking about the individual keys you're typing any
+more.  You'll think: "delete a line" and not "press <code>dd</code>".  Your fingers and
+brain will learn your mappings and the keys themselves will become subconscious.</p>
+<h2 id="insert-mode">Insert Mode</h2>
+<p>Now that we've covered how to map keys in normal and visual mode, let's move on
+to insert mode.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>imap <span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">d</span><span class="p">&gt;</span> dd
+</pre></div>
+
+
+<p>You might think that this would let you press <code>Ctrl+d</code> whenever you're in insert
+mode to delete the current line.  This would be handy because you wouldn't need
+to go back into normal mode to cut out lines.</p>
+<p>Go ahead and try it.  It won't work -- instead it will just put two <code>d</code>s in your
+file!  That's pretty useless.</p>
+<p>The problem is that Vim is doing exactly what we told it to.  We said: "when
+I press <code>&lt;c-d&gt;</code> I want you to do what pressing <code>d</code> and <code>d</code> would normally do".
+Well, normally when you're in insert mode and press the <code>d</code> key twice, you get
+two <code>d</code>s in a row!</p>
+<p>To make this mapping do what we intended we need to be very explicit.  Run this
+command to change the mapping:</p>
+<div class="codehilite"><pre><span class="p">:</span>imap <span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">d</span><span class="p">&gt;</span> <span class="p">&lt;</span>esc<span class="p">&gt;</span>dd
+</pre></div>
+
+
+<p>The <code>&lt;esc&gt;</code> is our way of telling Vim to press the Escape key, which will take
+us out of insert mode.</p>
+<p>Now try the mapping.  It works, but notice how you're now back in normal mode.
+This makes sense because we told Vim that <code>&lt;c-d&gt;</code> should exit insert mode and
+delete a line, but we never told it to go back into insert mode.</p>
+<p>Run one more command to fix the mapping once and for all:</p>
+<div class="codehilite"><pre><span class="p">:</span>imap <span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">d</span><span class="p">&gt;</span> <span class="p">&lt;</span>esc<span class="p">&gt;</span>ddi
+</pre></div>
+
+
+<p>The <code>i</code> at the end enters insert mode, and our mapping is finally complete.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Set up a mapping so that you can press <code>&lt;c-u&gt;</code> to convert the current word to
+uppercase when you're in insert mode.  Remember that <code>U</code> in visual mode will
+uppercase the selection.  I find this mapping extremely useful when I'm writing
+out the name of a long constant like <code>MAX_CONNECTIONS_ALLOWED</code>.  I type out the
+constant in lower case and then uppercase it with the mapping instead of holding
+shift the entire time.</p>
+<p>Add that mapping to your <code>~/.vimrc</code> file.</p>
+<p>Set up a mapping so that you can uppercase the current word with <code>&lt;c-u&gt;</code> when in
+<em>normal</em> mode.  This will be slightly different than the previous mapping
+because you don't need to enter normal mode.  You should end up back in normal
+mode at the end instead of in insert mode as well.</p>
+<p>Add that mapping to your <code>~/.vimrc</code> file.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/03.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/05.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

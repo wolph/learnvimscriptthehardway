@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Case Study: Grep Operator, Part Three / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#case-study-grep-operator-part-three">Case Study: Grep Operator, Part Three</a><ul>
+<li><a href="#saving-registers">Saving Registers</a></li>
+<li><a href="#namespacing">Namespacing</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/33.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/35.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="case-study-grep-operator-part-three">Case Study: Grep Operator, Part Three</h1>
+<p>Our shiny new "grep operator" is working great, but part of writing Vimscript is
+being considerate and making your users' lives easier.  We can do two more
+things to make our operator play nicely in the Vim ecosystem.</p>
+<h2 id="saving-registers">Saving Registers</h2>
+<p>By yanking the text into the unnamed register we destroy anything that was
+previously in there.</p>
+<p>This isn't very nice to our users, so let's save the contents of that register
+before we yank and restore it after we've done.  Change the code to look like
+this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">let</span> saved_unnamed_register <span class="p">=</span> @@
+
+    <span class="k">if</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'v'</span>
+        normal<span class="p">!</span> `<span class="p">&lt;</span><span class="k">v</span>`<span class="p">&gt;</span><span class="k">y</span>
+    <span class="k">elseif</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'char'</span>
+        normal<span class="p">!</span> `[<span class="k">v</span>`]<span class="k">y</span>
+    <span class="k">else</span>
+        <span class="k">return</span>
+    <span class="k">endif</span>
+
+    <span class="k">silent</span> execute <span class="s2">"grep! -R "</span> . shellescape<span class="p">(</span>@@<span class="p">)</span> . <span class="s2">" ."</span>
+    <span class="k">copen</span>
+
+    <span class="k">let</span> @@ <span class="p">=</span> saved_unnamed_register
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>We've added two <code>let</code> statements at the top and bottom of the function.  The
+first saves the contents of <code>@@</code> into a variable and the second restores it.</p>
+<p>Write and source the file.  Make sure it works by yanking some text, then
+pressing <code>&lt;leader&gt;giw</code> to run our operator, then pressing <code>p</code> to paste the text
+you yanked before.</p>
+<p>When writing Vim plugins you should <em>always</em> strive to save and restore any
+settings or registers your code modifies so you don't surprise and confuse your
+users.</p>
+<h2 id="namespacing">Namespacing</h2>
+<p>Our script created a function named <code>GrepOperator</code> in the global namespace.
+This probably isn't a big deal, but when you're writing Vimscript it's far
+better to be safe than sorry.</p>
+<p>We can avoid polluting the global namespace by tweaking a couple of lines in our
+code.  Edit the file to look like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="k">set</span> <span class="nb">operatorfunc</span><span class="p">=&lt;</span>SID<span class="p">&gt;</span>GrepOperator<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span><span class="k">g</span>@
+<span class="nb">vnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">g</span> :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span><span class="k">call</span> <span class="p">&lt;</span>SID<span class="p">&gt;</span>GrepOperator<span class="p">(</span>visualmode<span class="p">())&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> s:GrepOperator<span class="p">(</span>type<span class="p">)</span>
+    <span class="k">let</span> saved_unnamed_register <span class="p">=</span> @@
+
+    <span class="k">if</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'v'</span>
+        normal<span class="p">!</span> `<span class="p">&lt;</span><span class="k">v</span>`<span class="p">&gt;</span><span class="k">y</span>
+    <span class="k">elseif</span> <span class="k">a</span>:type <span class="p">==</span># <span class="s1">'char'</span>
+        normal<span class="p">!</span> `[<span class="k">v</span>`]<span class="k">y</span>
+    <span class="k">else</span>
+        <span class="k">return</span>
+    <span class="k">endif</span>
+
+    <span class="k">silent</span> execute <span class="s2">"grep! -R "</span> . shellescape<span class="p">(</span>@@<span class="p">)</span> . <span class="s2">" ."</span>
+    <span class="k">copen</span>
+
+    <span class="k">let</span> @@ <span class="p">=</span> saved_unnamed_register
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>The first three lines of the script have changed.  First, we modified the
+function name to start with <code>s:</code> which places it in the current script's
+namespace.</p>
+<p>We also modified the mappings and prepended the <code>GrepOperator</code> function name
+with <code>&lt;SID&gt;</code> so they could find the function.  If we hadn't done this they would
+have tried to find the function in the global namespace, which wouldn't have
+worked.</p>
+<p>Congratulations, our <code>grep-operator.vim</code> script is not only extremely useful,
+but it's also a considerate Vimscript citizen!</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help &lt;SID&gt;</code>.</p>
+<p>Treat yourself to a snack.  You deserve it!</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/33.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/35.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Advanced Folding / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#advanced-folding">Advanced Folding</a><ul>
+<li><a href="#folding-theory">Folding Theory</a></li>
+<li><a href="#first-make-a-plan">First: Make a Plan</a></li>
+<li><a href="#getting-started">Getting Started</a></li>
+<li><a href="#expr-folding">Expr Folding</a></li>
+<li><a href="#blank-lines">Blank Lines</a></li>
+<li><a href="#special-foldlevels">Special Foldlevels</a></li>
+<li><a href="#an-indentation-level-helper">An Indentation Level Helper</a></li>
+<li><a href="#one-more-helper">One More Helper</a></li>
+<li><a href="#finishing-the-fold-function">Finishing the Fold Function</a><ul>
+<li><a href="#blanks">Blanks</a></li>
+<li><a href="#finding-indentation-levels">Finding Indentation Levels</a></li>
+<li><a href="#equal-indents">Equal Indents</a></li>
+<li><a href="#lesser-indent-levels">Lesser Indent Levels</a></li>
+<li><a href="#greater-indentation-levels">Greater Indentation Levels</a></li>
+</ul>
+</li>
+<li><a href="#review">Review</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/48.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/50.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="advanced-folding">Advanced Folding</h1>
+<p>In the last chapter we used Vim's <code>indent</code> folding to add some quick and dirty
+folding to Potion files.</p>
+<p>Open <code>factorial.pn</code> and make sure all the folds are closed with <code>zM</code>.  The file
+should now look something like this:</p>
+<div class="codehilite"><pre>factorial = (n):
++--  5 lines: total = 1
+
+10 times (i):
++--  4 lines: i string print
+</pre></div>
+
+
+<p>Toggle the first fold and it will look like this:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
++---  2 lines: # Multiply the running total.
+    total.
+
+10 times (i):
++--  4 lines: i string print
+</pre></div>
+
+
+<p>This is pretty nice, but I personally prefer to fold the first line of a block
+with its contents.  In this chapter we'll write some custom folding code, and
+when we're done our folds will look like this:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
++---  3 lines: n to 1 (i):
+    total.
+
++--  5 lines: 10 times (i):
+</pre></div>
+
+
+<p>This is more compact and (to me) easier to read.  If you prefer the <code>indent</code>
+method that's okay, but do this chapter anyway just to get some practice writing
+Vim folding expressions.</p>
+<h2 id="folding-theory">Folding Theory</h2>
+<p>When writing custom folding code it helps to have an idea of how Vim "thinks" of
+folding.  Here are the rules in a nutshell:</p>
+<ul>
+<li>Each line of code in a file has a "foldlevel".  This is always either zero or
+  a positive integer.</li>
+<li>Lines with a foldlevel of zero are <em>never</em> included in any fold.</li>
+<li>Adjacent lines with the same foldlevel are folded together.</li>
+<li>If a fold of level X is closed, any subsequent lines with a foldlevel greater
+  than or equal to X are folded along with it until you reach a line with
+  a level less than X.</li>
+</ul>
+<p>It's easiest to get a feel for this with an example.  Open a Vim window and
+paste the following text into it.</p>
+<div class="codehilite"><pre>a
+    b
+    c
+        d
+        e
+    f
+g
+</pre></div>
+
+
+<p>Turn on <code>indent</code> folding by running the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">setlocal</span> <span class="nb">foldmethod</span><span class="p">=</span>indent
+</pre></div>
+
+
+<p>Play around with the folds for a minute to see how they behave.</p>
+<p>Now run the following command to view the foldlevel of line 1:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="nb">foldlevel</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display <code>0</code>.  Now let's find the foldlevel of line 2:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="nb">foldlevel</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display <code>1</code>.  Let's try line 3:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="nb">foldlevel</span><span class="p">(</span><span class="m">3</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Once again Vim displays <code>1</code>.  This means that lines 2 and 3 are part of a level
+1 fold.</p>
+<p>Here are the foldlevels for each line:</p>
+<div class="codehilite"><pre>a           0
+    b       1
+    c       1
+        d   2
+        e   2
+    f       1
+g           0
+</pre></div>
+
+
+<p>Reread the rules at the beginning of this section.  Open and close each fold in
+this file, look at the foldlevels, and make sure you understand why the folds
+behave as they do.</p>
+<p>Once you're confident that you understand how every line's foldlevel works to
+create the folding structure, move on to the next section.</p>
+<h2 id="first-make-a-plan">First: Make a Plan</h2>
+<p>Before we dive into writing code, let's try to sketch out some rough "rules" for
+our folding.</p>
+<p>First, lines that are indented should be folded together.  We also want the
+<em>previous</em> line folded with them, so that something like this:</p>
+<div class="codehilite"><pre>hello = (name):
+    'Hello, ' print
+    name print.
+</pre></div>
+
+
+<p>Will fold like this:</p>
+<div class="codehilite"><pre>+--  3 lines: hello = (name):
+</pre></div>
+
+
+<p>Blank lines should be at the same level as <em>later</em> lines, so blank lines at the
+end of a fold won't be included in it.  This means that this:</p>
+<div class="codehilite"><pre>hello = (name):
+    'Hello, ' print
+    name print.
+
+hello('Steve')
+</pre></div>
+
+
+<p>Will fold like this:</p>
+<div class="codehilite"><pre>+--  3 lines: hello = ():
+
+hello('Steve')
+</pre></div>
+
+
+<p>And <em>not</em> like this:</p>
+<div class="codehilite"><pre>+--  4 lines: hello = ():
+hello('Steve')
+</pre></div>
+
+
+<p>These rules are a matter of personal preference, but for now this is the way
+we're going to implement folding.</p>
+<h2 id="getting-started">Getting Started</h2>
+<p>Let's get started on our custom folding code by opening Vim with two splits.
+One should contain our <code>ftplugin/potion/folding.vim</code> file, and the other should
+contain our sample <code>factorial.pn</code>.</p>
+<p>In the previous chapter we closed and reopened Vim to make our changes to
+<code>folding.vim</code> take effect, but it turns out there's an easier way to do that.</p>
+<p>Remember that any files inside <code>ftplugin/potion/</code> will be run whenever the
+<code>filetype</code> of a buffer is set to <code>potion</code>.  This means you can simply run <code>:set
+ft=potion</code> in the split containing <code>factorial.pn</code> and Vim will reload the
+folding code!</p>
+<p>This is much faster than closing and reopening the file every time.  The only
+thing you need to remember is that you have to <em>save</em> <code>folding.vim</code> to disk,
+otherwise your unsaved changes won't be taken into account.</p>
+<h2 id="expr-folding">Expr Folding</h2>
+<p>We're going to use Vim's <code>expr</code> folding to give us unlimited flexibility in how
+our code is folded.</p>
+<p>We can go ahead and remove the <code>foldignore</code> from <code>folding.vim</code> because it's only
+relevant when using <code>indent</code> folding.  We also want to tell Vim to use <code>expr</code>
+folding, so change the contents of <code>folding.vim</code> to look like this:</p>
+<div class="codehilite"><pre><span class="k">setlocal</span> <span class="nb">foldmethod</span><span class="p">=</span>expr
+<span class="k">setlocal</span> <span class="nb">foldexpr</span><span class="p">=</span>GetPotionFold<span class="p">(</span><span class="k">v</span>:lnum<span class="p">)</span>
+
+<span class="k">function</span><span class="p">!</span> GetPotionFold<span class="p">(</span>lnum<span class="p">)</span>
+    <span class="k">return</span> <span class="s1">'0'</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>The first line simply tells Vim to use <code>expr</code> folding.</p>
+<p>The second line defines the expression Vim should use to get the foldlevel of
+a line.  When Vim runs the expression it will set <code>v:lnum</code> to the line number of
+the line it wants to know about.  Our expression will call a custom function
+with this number as an argument.</p>
+<p>Finally we define a dummy function that simply returns <code>'0'</code> for every line.
+Note that it's returning a String and not an Integer.  We'll see why shortly.</p>
+<p>Go ahead and reload the folding code by saving <code>folding.vim</code> and running <code>:set
+ft=potion</code> in <code>factorial.pn</code>.  Our function returns <code>'0'</code> for every line, so
+Vim won't fold anything at all.</p>
+<h2 id="blank-lines">Blank Lines</h2>
+<p>Let's take care of the special case of blank lines first.  Modify the
+<code>GetPotionFold</code> function to look like this:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> GetPotionFold<span class="p">(</span>lnum<span class="p">)</span>
+    <span class="k">if</span> getline<span class="p">(</span><span class="k">a</span>:lnum<span class="p">)</span> <span class="p">=~</span>? <span class="s1">'\v^\s*$'</span>
+        <span class="k">return</span> <span class="s1">'-1'</span>
+    <span class="k">endif</span>
+
+    <span class="k">return</span> <span class="s1">'0'</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>We've added an <code>if</code> statement to take care of the blank lines.  How does it
+work?</p>
+<p>First we use <code>getline(a:lnum)</code> to get the content of the current line as
+a String.</p>
+<p>We compare this to the regex <code>\v^\s*$</code>.  Remember that <code>\v</code> turns on "very
+magic" ("sane") mode.  This regex will match "beginning of line, any number
+of whitespace characters, end of line".</p>
+<p>The comparison is using the case-insensitive match operator <code>=~?</code>.  Technically
+we don't have to be worried about case since we're only matching whitespace, but
+I prefer to be more explicit when using comparison operators on Strings.  You
+can use <code>=~</code> instead if you prefer.</p>
+<p>If you need a refresher on using regular expressions in Vim you should go back
+and reread the "Basic Regular Expressions" chapter and the chapters on the "Grep
+Operator".</p>
+<p>If the current line has some non-whitespace characters it won't match and we'll
+just return <code>'0'</code> as before.</p>
+<p>If the current line <em>does</em> match the regex (i.e. if it's empty or just
+whitespace) we return the string <code>'-1'</code>.</p>
+<p>Earlier I said that a line's foldlevel can be zero or a positive integer, so
+what's happening here?</p>
+<h2 id="special-foldlevels">Special Foldlevels</h2>
+<p>Your custom folding expression can return a foldlevel directly, or return one of
+a few "special" strings that tell Vim how to fold the line without directly
+specifying its level.</p>
+<p><code>'-1'</code> is one of these special strings.  It tells Vim that the level of this
+line is "undefined".  Vim will interpret this as "the foldlevel of this line is
+equal to the foldlevel of the line above or below it, whichever is smaller".</p>
+<p>This isn't <em>exactly</em> what our plan called for, but we'll see that it's close
+enough and will do what we want.</p>
+<p>Vim can "chain" these undefined lines together, so if you have two in a row
+followed by a line at level 1, it will set the last undefined line to 1, then
+the next to last to 1, then the first to 1.</p>
+<p>When writing custom folding code you'll often find a few types of line that you
+can easily set a specific level for.  Then you'll use <code>'-1'</code> (and some other
+special foldlevels we'll see soon) to "cascade" the proper folding levels to the
+rest of the file.</p>
+<p>If you reload the folding code for <code>factorial.pn</code> Vim <em>still</em> won't fold any
+lines together.  This is because all the lines have a foldlevel of either zero
+or "undefined".  The level <code>0</code> will "cascade" through the undefined lines and
+eventually all the lines will have their foldlevel set to <code>0</code>.</p>
+<h2 id="an-indentation-level-helper">An Indentation Level Helper</h2>
+<p>To tackle non-blank lines we'll need to know their indentation level, so let's
+create a small helper function to calculate it for us.  Add the following
+function above <code>GetPotionFold</code>:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> IndentLevel<span class="p">(</span>lnum<span class="p">)</span>
+    <span class="k">return</span> indent<span class="p">(</span><span class="k">a</span>:lnum<span class="p">)</span> / &amp;<span class="nb">shiftwidth</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Reload the folding code.  Test out your function by running the following
+command in the <code>factorial.pn</code> buffer:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> IndentLevel<span class="p">(</span><span class="m">1</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays <code>0</code> because line 1 is not indented.  Now try it on line 2:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> IndentLevel<span class="p">(</span><span class="m">2</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This time Vim displays <code>1</code>.  Line two has 4 spaces at the beginning, and
+<code>shiftwidth</code> is set to 4, so 4 divided by 4 is 1.</p>
+<p><code>IndentLevel</code> is fairly straightforward.  The <code>indent(a:lnum)</code> returns the
+number of spaces at the beginning of the given line number.  We divide that by
+the <code>shiftwidth</code> of the buffer to get the indentation level.</p>
+<p>Why did we use <code>&amp;shiftwidth</code> instead of just dividing by 4?  If someone prefers
+two-space indentation in their Potion files, dividing by 4 would produce an
+incorrect result.  We use the <code>shiftwidth</code> setting to allow for any number of
+spaces per level.</p>
+<h2 id="one-more-helper">One More Helper</h2>
+<p>It might not be obvious where to go from here.  Let's stop and think about what
+type of information we need to have to figure out how to fold a non-blank line.</p>
+<p>We need to know the indentation level of the line itself.  We've got that
+covered with the <code>IndentLevel</code> function, so we're all set there.</p>
+<p>We'll also need to know the indentation level of the <em>next non-blank line</em>,
+because we want to fold the "header" lines with their indented bodies.</p>
+<p>Let's write a helper function to get the number of the next non-blank line after
+a given line.  Add the following function above <code>IndentLevel</code>:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> NextNonBlankLine<span class="p">(</span>lnum<span class="p">)</span>
+    <span class="k">let</span> numlines <span class="p">=</span> line<span class="p">(</span><span class="s1">'$'</span><span class="p">)</span>
+    <span class="k">let</span> current <span class="p">=</span> <span class="k">a</span>:lnum <span class="p">+</span> <span class="m">1</span>
+
+    <span class="k">while</span> current <span class="p">&lt;=</span> numlines
+        <span class="k">if</span> getline<span class="p">(</span>current<span class="p">)</span> <span class="p">=~</span>? <span class="s1">'\v\S'</span>
+            <span class="k">return</span> current
+        <span class="k">endif</span>
+
+        <span class="k">let</span> current <span class="p">+=</span> <span class="m">1</span>
+    <span class="k">endwhile</span>
+
+    <span class="k">return</span> <span class="m">-2</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>This function is a bit longer, but is pretty simple.  Let's take it
+piece-by-piece.</p>
+<p>First we store the total number of lines in the file with <code>line('$')</code>.  Check
+out the documentation for <code>line()</code> to see how this works.</p>
+<p>Next we set the variable <code>current</code> to the number of the next line.</p>
+<p>We then start a loop that will walk through each line in the file.</p>
+<p>If the line matches the regex <code>\v\S</code>, which means "match a character that's
+<em>not</em> a whitespace character", then it must be non-blank, so we should return
+its line number.</p>
+<p>If the line doesn't match, we loop around to the next one.</p>
+<p>If the loop gets all the way to the end of the file without ever returning, then
+there are <em>no</em> non-blank lines after the current line!  We return <code>-2</code> if that
+happens to indicate this.  <code>-2</code> isn't a valid line number, so it's an easy way
+to say "sorry, there's no valid result".</p>
+<p>We could have returned <code>-1</code>, because that's not a valid line number either.
+I could have even picked <code>0</code>, since line numbers in Vim start at <code>1</code>!  So why
+did I pick <code>-2</code>, which seems like a strange choice?</p>
+<p>I chose <code>-2</code> because we're working with folding code, and <code>'-1'</code> (and <code>'0'</code>) is
+a special Vim foldlevel string.</p>
+<p>When my eyes are reading over this file and I see a <code>-1</code> my brain immediately
+thinks "undefined foldlevel".  The same is true with <code>0</code>.  I picked <code>-2</code> here
+simply to make it obvious that it's <em>not</em> a foldlevel, but is instead an
+"error".</p>
+<p>If this feels weird to you, you can safely change the <code>-2</code> to a <code>-1</code> or a <code>0</code>.
+It's just a coding style preference.</p>
+<h2 id="finishing-the-fold-function">Finishing the Fold Function</h2>
+<p>This is turning out to be quite a long chapter, so let's wrap up the folding
+function.  Change <code>GetPotionFold</code> to look like this:</p>
+<div class="codehilite"><pre><span class="k">function</span><span class="p">!</span> GetPotionFold<span class="p">(</span>lnum<span class="p">)</span>
+    <span class="k">if</span> getline<span class="p">(</span><span class="k">a</span>:lnum<span class="p">)</span> <span class="p">=~</span>? <span class="s1">'\v^\s*$'</span>
+        <span class="k">return</span> <span class="s1">'-1'</span>
+    <span class="k">endif</span>
+
+    <span class="k">let</span> this_indent <span class="p">=</span> IndentLevel<span class="p">(</span><span class="k">a</span>:lnum<span class="p">)</span>
+    <span class="k">let</span> next_indent <span class="p">=</span> IndentLevel<span class="p">(</span>NextNonBlankLine<span class="p">(</span><span class="k">a</span>:lnum<span class="p">))</span>
+
+    <span class="k">if</span> next_indent <span class="p">==</span> this_indent
+        <span class="k">return</span> this_indent
+    <span class="k">elseif</span> next_indent <span class="p">&lt;</span> this_indent
+        <span class="k">return</span> this_indent
+    <span class="k">elseif</span> next_indent <span class="p">&gt;</span> this_indent
+        <span class="k">return</span> <span class="s1">'&gt;'</span> . next_indent
+    <span class="k">endif</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>That's a lot of new code!  Let's step through it to see how it all works.</p>
+<h3 id="blanks">Blanks</h3>
+<p>First we have our check for blank lines.  Nothing's changed there.</p>
+<p>If we get past that check we know we're looking at a non-blank line.</p>
+<h3 id="finding-indentation-levels">Finding Indentation Levels</h3>
+<p>Next we use our two helper functions to get the indent level of the current
+line, and the indent level of the next non-blank line.</p>
+<p>You might wonder what happens if <code>NextNonBlankLine</code> returns our error condition
+of <code>-2</code>.  If that happens, <code>indent(-2)</code> will be run.  Running <code>indent()</code> on
+a nonexistent line number will just return <code>-1</code>.  Go ahead and try it yourself
+with <code>:echom indent(-2)</code>.</p>
+<p><code>-1</code> divided by any <code>shiftwidth</code> larger than <code>1</code> will return <code>0</code>.  This may seem
+like a problem, but it turns out that it won't be.  For now, don't worry about
+it.</p>
+<h3 id="equal-indents">Equal Indents</h3>
+<p>Now that we have the indentation levels of the current line and the next
+non-blank line, we can compare them and decide how to fold the current line.</p>
+<p>Here's the <code>if</code> statement again:</p>
+<div class="codehilite"><pre><span class="k">if</span> next_indent <span class="p">==</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&lt;</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&gt;</span> this_indent
+    <span class="k">return</span> <span class="s1">'&gt;'</span> . next_indent
+<span class="k">endif</span>
+</pre></div>
+
+
+<p>First we check if the two lines have the same indentation level.  If they do, we
+simply return that indentation level as the foldlevel!</p>
+<p>An example of this would be:</p>
+<div class="codehilite"><pre>a
+b
+    c
+    d
+e
+</pre></div>
+
+
+<p>If we're looking at the line containing "c", it has an indentation level of 1.
+This is the same as the level of the next non-blank line ("d"), so we return <code>1</code>
+as the foldlevel.</p>
+<p>If we're looking at "a", it has an indentation level of 0.  This is the same as
+the level of the next non-blank line ("b"), so we return <code>0</code> as the foldlevel.</p>
+<p>This case fills in two foldlevels in this simple example:</p>
+<div class="codehilite"><pre>a       0
+b       ?
+    c   1
+    d   ?
+e       ?
+</pre></div>
+
+
+<p>By pure luck this also handles the special "error" case of the last line as
+well!  Remember we said that <code>next_indent</code> will be <code>0</code> if our helper function
+returns <code>-2</code>.</p>
+<p>In this example the line "e" has an indent level of <code>0</code>, and <code>next_indent</code> will
+also be set to <code>0</code>, so this case matches and returns <code>0</code>.  The foldlevels now
+look like this:</p>
+<div class="codehilite"><pre>a       0
+b       ?
+    c   1
+    d   ?
+e       0
+</pre></div>
+
+
+<h3 id="lesser-indent-levels">Lesser Indent Levels</h3>
+<p>Once again, here's the <code>if</code> statement:</p>
+<div class="codehilite"><pre><span class="k">if</span> next_indent <span class="p">==</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&lt;</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&gt;</span> this_indent
+    <span class="k">return</span> <span class="s1">'&gt;'</span> . next_indent
+<span class="k">endif</span>
+</pre></div>
+
+
+<p>The second part of the <code>if</code> checks if the indentation level of the next line is
+<em>smaller</em> than the current line.  This would be like line "d" in our example.</p>
+<p>If that's the case, we once again return the indentation level of the current
+line.</p>
+<p>Now our example looks like this:</p>
+<div class="codehilite"><pre>a       0
+b       ?
+    c   1
+    d   1
+e       0
+</pre></div>
+
+
+<p>You could, of course, combine these two cases with <code>||</code>, but I prefer to keep
+them separate to make it more explicit.  You might feel differently.  It's
+a style issue.</p>
+<p>Again, purely by luck, this case handles the other possible "error" case of our
+helper function.  Imagine that we have a file like this:</p>
+<div class="codehilite"><pre>a
+    b
+    c
+</pre></div>
+
+
+<p>The first case takes care of line "b":</p>
+<div class="codehilite"><pre>a       ?
+    b   1
+    c   ?
+</pre></div>
+
+
+<p>Line "c" is the last line, and it has an indentation level of 1.  The
+<code>next_indent</code> will be set to <code>0</code> thanks to our helper functions.  The second
+part of the <code>if</code> matches and sets the foldlevel to the current indentation
+level, or <code>1</code>:</p>
+<div class="codehilite"><pre>a       ?
+    b   1
+    c   1
+</pre></div>
+
+
+<p>This works out great, because "b" and "c" will be folded together.</p>
+<h3 id="greater-indentation-levels">Greater Indentation Levels</h3>
+<p>Here's that tricky <code>if</code> statement for the last time:</p>
+<div class="codehilite"><pre><span class="k">if</span> next_indent <span class="p">==</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&lt;</span> this_indent
+    <span class="k">return</span> this_indent
+<span class="k">elseif</span> next_indent <span class="p">&gt;</span> this_indent
+    <span class="k">return</span> <span class="s1">'&gt;'</span> . next_indent
+<span class="k">endif</span>
+</pre></div>
+
+
+<p>And our example file:</p>
+<div class="codehilite"><pre>a       0
+b       ?
+    c   1
+    d   1
+e       0
+</pre></div>
+
+
+<p>The only line we haven't figured out is "b", because:</p>
+<ul>
+<li>"b" has an indent level of <code>0</code>.</li>
+<li>"c" has an indent level of <code>1</code>.</li>
+<li>1 is not equal to 0, nor is 1 less than 0.</li>
+</ul>
+<p>The last case checks if the next line has a <em>larger</em> indentation level than the
+current one.</p>
+<p>This is the case that Vim's <code>indent</code> folding gets wrong, and it's the entire
+reason we're writing this custom folding in the first place!</p>
+<p>The final case says that when the next line is indented more than the current
+one, it should return a string of a <code>&gt;</code> character and the indentation level of
+the <em>next</em> line.  What the heck is <em>that</em>?</p>
+<p>Returning a string like <code>&gt;1</code> from the fold expression is another one of Vim's
+"special" foldlevels.  It tells Vim that the current line should <em>open</em> a fold
+of the given level.</p>
+<p>In this simple example we could have just returned the number, but we'll see
+why this is important shortly.</p>
+<p>In this case line "b" will open a fold at level 1, which makes our example look
+like this:</p>
+<div class="codehilite"><pre>a       0
+b       &gt;1
+    c   1
+    d   1
+e       0
+</pre></div>
+
+
+<p>That's exactly what we want!  Hooray!</p>
+<h2 id="review">Review</h2>
+<p>If you've made it this far you should feel proud of yourself.  Even simple
+folding code like this can be tricky and mind bending.</p>
+<p>Before we end, let's go through our original <code>factorial.pn</code> code and see how our
+folding expression fills in the foldlevels of its lines.</p>
+<p>Here's <code>factorial.pn</code> for reference:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
+        # Multiply the running total.
+        total *= i.
+    total.
+
+10 times (i):
+    i string print
+    '! is: ' print
+    factorial (i) string print
+    "\n" print.
+</pre></div>
+
+
+<p>First, any blank lines' foldlevels will be set to undefined:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
+        # Multiply the running total.
+        total *= i.
+    total.
+                                         undefined
+10 times (i):
+    i string print
+    '! is: ' print
+    factorial (i) string print
+    "\n" print.
+</pre></div>
+
+
+<p>Any lines where the next line's indentation is <em>equal</em> to its own are set to its
+own level:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1                            1
+    n to 1 (i):
+        # Multiply the running total.    2
+        total *= i.
+    total.
+                                         undefined
+10 times (i):
+    i string print                       1
+    '! is: ' print                       1
+    factorial (i) string print           1
+    "\n" print.
+</pre></div>
+
+
+<p>The same thing happens when the next line's indentation is <em>less</em> than the
+current line's: </p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1                            1
+    n to 1 (i):
+        # Multiply the running total.    2
+        total *= i.                      2
+    total.                               1
+                                         undefined
+10 times (i):
+    i string print                       1
+    '! is: ' print                       1
+    factorial (i) string print           1
+    "\n" print.                          1
+</pre></div>
+
+
+<p>The last case is when the next line's indentation is <em>greater</em> than the current
+line's.  When that happens the line's foldlevel is set to <em>open</em> a fold of the
+<em>next</em> line's foldlevel:</p>
+<div class="codehilite"><pre>factorial = (n):                         &gt;1
+    total = 1                            1
+    n to 1 (i):                          &gt;2
+        # Multiply the running total.    2
+        total *= i.                      2
+    total.                               1
+                                         undefined
+10 times (i):                            &gt;1
+    i string print                       1
+    '! is: ' print                       1
+    factorial (i) string print           1
+    "\n" print.                          1
+</pre></div>
+
+
+<p>Now we've got a foldlevel for every line in the file.  All that's left is for
+Vim to resolve any undefined lines.</p>
+<p>Earlier I said that undefined lines will take on the smallest foldlevel of
+either of their neighbors.</p>
+<p>That's how Vim's manual describes it, but it's not entirely accurate.  If that
+were the case, the blank line in our file would take foldlevel 1, because both
+of its neighbors have a foldlevel of 1.</p>
+<p>In reality, the blank line will be given a foldlevel of 0!</p>
+<p>The reason for this is that we didn't just set the <code>10 times (i):</code> line to
+foldlevel <code>1</code> directly.  We told Vim that the line <em>opens</em> a fold of level <code>1</code>.
+Vim is smart enough to know that this means the undefined line should be set to
+<code>0</code> instead of <code>1</code>.</p>
+<p>The exact logic of this is probably buried deep within Vim's source code.  In
+general Vim behaves pretty intelligently when resolving undefined lines against
+"special" foldlevels, so it will usually do what you want.</p>
+<p>Once Vim's resolved the undefined line it has a complete description of how to
+fold each line in the file, which looks like this:</p>
+<div class="codehilite"><pre>factorial = (n):                         1
+    total = 1                            1
+    n to 1 (i):                          2
+        # Multiply the running total.    2
+        total *= i.                      2
+    total.                               1
+                                         0
+10 times (i):                            1
+    i string print                       1
+    '! is: ' print                       1
+    factorial (i) string print           1
+    "\n" print.                          1
+</pre></div>
+
+
+<p>That's it, we're done!  Reload the folding code and play around with the fancy
+new folding in <code>factorial.pn</code>.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help foldexpr</code>.</p>
+<p>Read <code>:help fold-expr</code>.  Pay particular attention to all the "special" strings
+your expression can return.</p>
+<p>Read <code>:help getline</code>.</p>
+<p>Read <code>:help indent()</code>.</p>
+<p>Read <code>:help line()</code>.</p>
+<p>Figure out why it's important that we use <code>.</code> to combine the <code>&gt;</code> character with
+the number in our folding function.  What would happen if you used <code>+</code> instead?
+Why?</p>
+<p>We defined our helper functions as global functions, but that's not a good idea.
+Change them to be script-local functions.</p>
+<p>Put this book down and go outside for a while to let your brain recover from
+this chapter.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/48.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/50.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

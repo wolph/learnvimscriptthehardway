@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Advanced Syntax Highlighting / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#advanced-syntax-highlighting">Advanced Syntax Highlighting</a><ul>
+<li><a href="#highlighting-comments">Highlighting Comments</a></li>
+<li><a href="#highlighting-operators">Highlighting Operators</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/45.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/47.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="advanced-syntax-highlighting">Advanced Syntax Highlighting</h1>
+<p>So far we've defined some simple syntax highlighting for Potion files: keywords
+and functions.</p>
+<p>If you didn't do the exercises in the last chapter, you need to go back and do
+them.  I'm going to assume you did them.</p>
+<p>In fact, you should go back and do <em>any</em> exercises you skipped.  Even if you
+think you don't need them, you <em>need</em> to do them for this book to be effective.
+Please trust me on this.</p>
+<h2 id="highlighting-comments">Highlighting Comments</h2>
+<p>One obvious part of Potion that we need to highlight is comments.  The problem
+is that Potion comments start with <code>#</code> which is (almost always) not in
+<code>iskeyword</code>.</p>
+<p>If you don't know what <code>iskeyword</code> means, you didn't listen to me.  Go back and
+<em>do the damn exercises</em>.  I'm not just throwing useless busywork at you when
+I write the exercises for each chapter.  You <em>really</em> need to do them to
+understand the book.</p>
+<p>Because <code>#</code> isn't a keyword character we need to use a regular expression to
+match it (and the rest of the comment).  We'll do this with <code>syntax match</code>
+instead of <code>syntax keyword</code>.  Add the following lines to your syntax file:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> <span class="k">match</span> potionComment <span class="s2">"\v#.*$"</span>
+<span class="nb">highlight</span> link potionComment Comment
+</pre></div>
+
+
+<p>I'm not going to tell you where to put them in the file any more.  You're
+a programmer: use your judgement.</p>
+<p>Close and reopen <code>factorial.pn</code>.  Add a comment somewhere in the file and you'll
+see that it's highlighted as a comment.</p>
+<p>The second line is simple: it tells Vim to highlight anything in the
+<code>potionComment</code> syntax group as a <code>Comment</code>.</p>
+<p>The first line is something new.  We use <code>syntax match</code> which tells Vim to match
+<em>regexes</em> instead of literal keywords.</p>
+<p>Notice that the regular expression we're using starts with <code>\v</code> which tells Vim
+to use "very magic" mode.  Reread the chapter on basic regular expressions if
+you're not sure what that means.</p>
+<p>In this particular case the "very magic" mode isn't necessary.  But in the
+future we might change this regex and wonder why it's not working, so I'd
+recommend <em>always</em> using "very magic" regexes for consistency.</p>
+<p>As for the regex itself, it's fairly simple: comments start with a hash and
+include all characters from there to the end of the line.</p>
+<p>If you need a refresher course on regular expressions you should take a look at
+<a href="http://regex.learncodethehardway.org/">Learn Regex the Hard Way</a> by Zed Shaw.</p>
+<h2 id="highlighting-operators">Highlighting Operators</h2>
+<p>Another part of Potion we need regexes to highlight is operators.  Add the
+following to your syntax file:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\*"</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v/"</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\+"</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v-"</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\?"</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\*\="</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v/\="</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\+\="</span>
+<span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v-\="</span>
+
+<span class="nb">highlight</span> link potionOperator Operator
+</pre></div>
+
+
+<p>Close and reopen <code>factorial.pn</code>.  Notice that the <code>*=</code> in the factorial function
+is now highlighted.</p>
+<p>The first thing you probably noticed about this hunk of code is that I put each
+regex on its own line instead of grouping them like I did with keywords.  This
+is because <code>syntax match</code> does <em>not</em> support multiple groups on a single line.</p>
+<p>You should also note that I used <code>\v</code> at the beginning of every regular
+expression, even when it wasn't strictly necessary.  I prefer to keep my regex
+syntax consistent when writing Vimscript, even if it means a few extra
+characters.</p>
+<p>You might be wondering why I didn't use a regex like <code>"\v-\=?"</code> to match both
+<code>-</code> <em>and</em> <code>-=</code> in one line.  You can absolutely do that if you want to.  It will
+work just fine.  I just tend to think of <code>-</code> and <code>-=</code> as separate operators, so
+I put them on separate lines.</p>
+<p>Defining those operators as separate matches simplifies the regexes at the cost
+of some extra verbosity.  I prefer doing it like that, but you may feel
+differently.  Use your judgement.</p>
+<p>I also never defined <code>=</code> as an operator.  We'll do that in a second, but
+I wanted to avoid it for now so I could teach you a lesson.</p>
+<p>Because I used separate regexes for <code>-</code> and <code>-=</code> I had to define <code>-=</code> <em>after</em>
+<code>-</code>!</p>
+<p>If I did it in the opposite order and used <code>-=</code> in a Potion file, Vim would
+match <code>-</code> (and highlight it, of course) and only <code>=</code> would remain for matching.
+This shows when you're building groups with <code>syntax match</code> each group "consumes"
+pieces of the file that can't be matched later.</p>
+<p>This is an oversimplification, but I don't want to get bogged down in the
+details just yet.  For now, your rule of thumb should be to match larger groups
+after smaller groups later because groups defined <em>later</em> have priority over
+groups defined <em>earlier</em>.</p>
+<p>Let's go ahead and add <code>=</code> as an operator, now that we've had our lesson:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> <span class="k">match</span> potionOperator <span class="s2">"\v\="</span>
+</pre></div>
+
+
+<p>Take a second and think about where you need to put this in the syntax file.
+Reread the last few paragraphs if you need a hint.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help syn-match</code>.</p>
+<p>Read <code>:help syn-priority</code>.</p>
+<p>We didn't make <code>:</code> an operator in our example.  Read the Potion docs and make
+a conscious decision about whether to make <code>:</code> an operator.  If you decide to do
+so, add it to the syntax file.</p>
+<p>Do the same for <code>.</code> and <code>/</code>.</p>
+<p>Add a syntax group <code>potionNumber</code> that highlights numbers.  Link it to the
+highlight group <code>Number</code>.  Remember that Potion supports numbers like <code>2</code>,
+<code>0xffaf</code>, <code>123.23</code>, <code>1e-2</code>, and <code>1.9956e+2</code>.  Remember to balance the time it
+takes to handle edge cases with the amount of time those edge cases will
+actually be used.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/45.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/47.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

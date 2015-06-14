@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>What Now? / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#what-now">What Now?</a><ul>
+<li><a href="#color-schemes">Color Schemes</a></li>
+<li><a href="#the-command-command">The Command Command</a></li>
+<li><a href="#runtimepath">runtimepath</a></li>
+<li><a href="#omnicomplete">Omnicomplete</a></li>
+<li><a href="#compiler-support">Compiler Support</a></li>
+<li><a href="#other-languages">Other Languages</a></li>
+<li><a href="#vims-documentation">Vim's Documentation</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/55.html">&laquo; Prev</a>
+            
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="what-now">What Now?</h1>
+<p>If you've read up to this point and completed all the examples and exercises
+you now have a pretty solid grasp of the basics of Vimscript.  Don't worry
+though, there's still <em>plenty</em> left to learn!</p>
+<p>Here are a few ideas of topics to look into if you're hungry for more.</p>
+<h2 id="color-schemes">Color Schemes</h2>
+<p>In this book we added syntax highlighting for Potion files.  The other side of
+the coin is the creation of custom color schemes that define what color to
+display each syntax element.</p>
+<p>Color schemes in Vim are fairly straightforward, if a bit repetitive, to make.
+Read <code>:help highlight</code> to learn the basics.  You may want to take a look at some
+of the built-in color schemes to see how they structure their files.</p>
+<p>If you're up for a challenge, take a look at the source of my own <a href="https://github.com/sjl/badwolf/blob/master/colors/badwolf.vim">Bad Wolf</a>
+color scheme to see how I've used Vimscript to make the definition and
+maintenance much easier for myself.  Pay attention to the "palette" dictionary
+and the <code>HL</code> function that dynamically builds the <code>highlight</code> commands.</p>
+<h2 id="the-command-command">The Command Command</h2>
+<p>Many plugins allow the user to interact with them through key mappings and
+function calls, but some prefer to create Ex commands instead.  For example, the
+<a href="https://github.com/tpope/vim-fugitive">Fugitive</a> plugin creates commands like <code>:Gbrowse</code> and <code>:Gdiff</code> and leaves it up
+to the user to decide how to call them.</p>
+<p>Commands like this are created with the <code>:command</code> command.  Read <code>:help
+user-commands</code> to learn how to make your own.  You should know enough Vimscript
+by now that reading Vim's documentation is sufficient for learning about new
+commands.</p>
+<h2 id="runtimepath">runtimepath</h2>
+<p>In this book I've kind of glossed over how Vim decides which files to load by
+saying "just use Pathogen".  Now that you know a decent amount of Vimscript you
+can read <code>:help runtimepath</code> and check out <a href="https://github.com/tpope/vim-pathogen/blob/master/autoload/pathogen.vim">Pathogen's source
+code</a> to find out what's <em>really</em> happening under the hood.</p>
+<h2 id="omnicomplete">Omnicomplete</h2>
+<p>Vim offers a number of different ways to complete text (read <code>:help
+ins-completion</code> for an overview).  Most are fairly simple, but the most powerful
+of them is "omnicomplete" which lets you call a custom Vimscript function to
+determine completions in just about any way you could possibly think of.</p>
+<p>When you're ready to dive into the rabbit hole of omnicompletion you can start
+with <code>:help omnifunc</code> and <code>:help coml-omni</code> and follow the trail from there.</p>
+<h2 id="compiler-support">Compiler Support</h2>
+<p>In our Potion plugin we created some mappings to compile and run our Potion
+files.  Vim offers much deeper support for interacting with compilers, including
+parsing compile errors and providing a nice list that lets you jump to the line
+of each error.</p>
+<p>If you're interested in this you can dive in by reading through <code>:help
+quickfix.txt</code> in its entirety.  However, I will warn you now that <code>errorformat</code>
+is <em>not</em> for the faint of heart!</p>
+<h2 id="other-languages">Other Languages</h2>
+<p>This book has focused on Vimscript, but Vim also offers interfaces in several
+other languages, like Python, Ruby, and Lua.  This means you can script Vim in
+a different language if you don't like Vimscript.</p>
+<p>It's still good to know Vimscript for editing your <code>~/.vimrc</code>, and for
+understanding the API Vim presents in each language.  But using an alternate
+language can be a great way to escape from the cruftiness of Vimscript,
+especially for large plugins.</p>
+<p>If you want to learn more about scripting Vim in a particular language, check
+out the help documents for it:</p>
+<ul>
+<li><code>:help Python</code></li>
+<li><code>:help Ruby</code></li>
+<li><code>:help Lua</code></li>
+<li><code>:help perl-using</code></li>
+<li><code>:help MzScheme</code></li>
+</ul>
+<h2 id="vims-documentation">Vim's Documentation</h2>
+<p>As a final parting note, here's a list of Vim help topics that are especially
+useful, informative, interesting, or just plain fun (in no particular order):</p>
+<ul>
+<li><code>:help various-motions</code></li>
+<li><code>:help sign-support</code></li>
+<li><code>:help virtualedit</code></li>
+<li><code>:help map-alt-keys</code></li>
+<li><code>:help error-messages</code></li>
+<li><code>:help development</code></li>
+<li><code>:help tips</code></li>
+<li><code>:help 24.8</code></li>
+<li><code>:help 24.9</code></li>
+<li><code>:help usr_12.txt</code></li>
+<li><code>:help usr_26.txt</code></li>
+<li><code>:help usr_32.txt</code></li>
+<li><code>:help usr_42.txt</code></li>
+</ul>
+<h2 id="exercises">Exercises</h2>
+<p>Go write a Vim plugin for something you've always wanted and share it with the
+world!</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/55.html">&laquo; Previous</a>
+            
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>More Mappings / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#more-mappings">More Mappings</a><ul>
+<li><a href="#a-more-complicated-mapping">A More Complicated Mapping</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/08.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/10.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="more-mappings">More Mappings</h1>
+<p>I know we've talked a lot about mappings so far, but we're going to practice
+them again now.  Mappings are one of the easiest and fastest ways to make your
+Vim editing more productive so it's good to focus on them quite a bit.</p>
+<p>One concept that has showed up in several examples but that we haven't
+explicitly talked about is mapping a sequence of multiple keys.</p>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> jk dd
+</pre></div>
+
+
+<p>Now make sure you're in normal mode and press <code>j</code> followed quickly by <code>k</code>.  Vim
+will delete the current line.</p>
+<p>Now try pressing only <code>j</code> and waiting for a bit.  If you don't press <code>k</code> quickly
+after the <code>j</code>, Vim decides that you don't want to activate the mapping and
+instead runs the normal <code>j</code> functionality (moving down a line).</p>
+<p>This mapping will make it painful to move around, so let's remove it.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>nunmap jk
+</pre></div>
+
+
+<p>Now typing <code>jk</code> in normal mode will move down and then up a line as usual.</p>
+<h2 id="a-more-complicated-mapping">A More Complicated Mapping</h2>
+<p>You've seen a bunch of simple mappings so far, so it's time to look at something
+with a bit more meat to it.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="s2">" viw&lt;esc&gt;a"</span><span class="p">&lt;</span>esc<span class="p">&gt;</span>hbi"<span class="p">&lt;</span>esc<span class="p">&gt;</span>lel
+</pre></div>
+
+
+<p>Now <em>that's</em> an interesting mapping!  First, go ahead and try it out.  Enter
+normal mode, put your cursor over a word in your text and type <code>&lt;leader&gt;"</code>.  Vim
+will surround the word in double quotes!</p>
+<p>How does this work?  Let's split it apart into pieces and think of what each one
+does:</p>
+<div class="codehilite"><pre>viw&lt;esc&gt;a"&lt;esc&gt;hbi"&lt;esc&gt;lel
+</pre></div>
+
+
+<ul>
+<li><code>viw</code>: visually select the current word</li>
+<li><code>&lt;esc&gt;</code>: exit visual mode, which leaves the cursor on the last character of
+  the word</li>
+<li><code>a</code>: enter insert mode <em>after</em> the current character</li>
+<li><code>"</code>: insert a <code>"</code> into the text, because we're in insert mode</li>
+<li><code>&lt;esc&gt;</code>: return to normal mode</li>
+<li><code>h</code>: move left one character</li>
+<li><code>b</code>: move back to the beginning of the word</li>
+<li><code>i</code>: enter insert mode <em>before</em> the current character</li>
+<li><code>"</code>: insert a <code>"</code> into the text again</li>
+<li><code>&lt;esc&gt;</code>: return to normal mode</li>
+<li><code>l</code>: move right, which puts our cursor on the first character of the word</li>
+<li><code>e</code>: move to the end of the word</li>
+<li><code>l</code>: move right, which puts our cursor over the ending quote</li>
+</ul>
+<p>Remember: because we used <code>nnoremap</code> instead of <code>nmap</code> it doesn't matter if
+you've mapped any of the keys in this sequence to something else.  Vim will use
+the default functionality for all of them.</p>
+<p>Hopefully you can see how much potential Vim's mappings have, as well as how
+unreadable they can become.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Create a mapping similar to the one we just looked at, but for single quotes
+instead of double quotes.</p>
+<p>Try using <code>vnoremap</code> to add a mapping that will wrap whatever text you have
+<em>visually selected</em> in quotes.  You'll probably need the <code>`&lt;</code> and <code>`&gt;</code>
+commands for this, so read up on them with <code>:help `&lt;</code>.</p>
+<p>Map <code>H</code> in normal mode to go to the beginning of the current line.  Since <code>h</code>
+moves left you can think of <code>H</code> as a "stronger" <code>h</code>.</p>
+<p>Map <code>L</code> in normal mode to go to the end of the current line. Since <code>l</code>
+moves right you can think of <code>L</code> as a "stronger" <code>l</code>.</p>
+<p>Find out what commands you just overwrote by reading <code>:help H</code> and <code>:help L</code>.
+Decide whether you care about them.</p>
+<p>Add all of these mappings to your <code>~/.vimrc</code> file, making sure to use your "edit
+my <code>~/.vimrc</code>" and "source my <code>~/.vimrc</code>" mappings to do so.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/08.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/10.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

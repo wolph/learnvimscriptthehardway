@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Paths / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#paths">Paths</a><ul>
+<li><a href="#absolute-paths">Absolute Paths</a></li>
+<li><a href="#listing-files">Listing Files</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/39.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/41.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="paths">Paths</h1>
+<p>Vim is a text editor, and text editors (usually) work with text files.  Text
+files live on filesystems, and to specify files we use paths.  Vimscript has
+a few built-in utilities that can be extremely helpful when you need to work
+with paths.</p>
+<h2 id="absolute-paths">Absolute Paths</h2>
+<p>Sometimes it's handy to be able to get the absolute path of a certain file for
+use with external scripts.  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> expand<span class="p">(</span><span class="s1">'%'</span><span class="p">)</span>
+<span class="p">:</span><span class="k">echom</span> expand<span class="p">(</span><span class="s1">'%:p'</span><span class="p">)</span>
+<span class="p">:</span><span class="k">echom</span> fnamemodify<span class="p">(</span><span class="s1">'foo.txt'</span><span class="p">,</span> <span class="s1">':p'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>The first command displays the relative path of whatever file you're currently
+editing.  <code>%</code> means "the current file".  Vim supports a bunch of other strings
+you can use with <code>expand()</code> as well.</p>
+<p>The second command displays the full, absolute path of that file.  The <code>:p</code> in
+the string tells Vim that you want the absolute path.  There are a ton of other
+modifiers you can use.</p>
+<p>The third command displays an absolute path to the file <code>foo.txt</code> in the current
+directory, regardless of whether that file actually exists.  <code>fnamemodify()</code> is
+a Vim function that's more flexible than <code>expand()</code> in that you can specify any
+file name, not just one of <code>expand()</code>'s special strings.</p>
+<h2 id="listing-files">Listing Files</h2>
+<p>You might also want to get a listing of files in a specific directory.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo globpath<span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="s1">'*'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will display all of the files and directories in the current directory.  The
+<code>globpath()</code> function returns a string, with each name separated by a newline.
+To get a list you'll need to <code>split()</code> it yourself.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo split<span class="p">(</span>globpath<span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="s1">'*'</span><span class="p">),</span> <span class="s1">'\n'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>This time Vim displays a Vimscript list containing each path.  If you've got
+newlines in your filenames you're on your own, sorry.</p>
+<p><code>globpath()</code>'s wildcards work mostly as you would expect.  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo split<span class="p">(</span>globpath<span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="s1">'*.txt'</span><span class="p">),</span> <span class="s1">'\n'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim displays a list of all <code>.txt</code> files in the current directory.</p>
+<p>You can recursively list files with <code>**</code>.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo split<span class="p">(</span>globpath<span class="p">(</span><span class="s1">'.'</span><span class="p">,</span> <span class="s1">'**'</span><span class="p">),</span> <span class="s1">'\n'</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will list all files and directories under the current directory.</p>
+<p><code>globpath()</code> is <em>extremely</em> powerful.  You'll learn more when you complete this
+chapter's exercises.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help expand()</code>.</p>
+<p>Read <code>:help fnamemodify()</code>.</p>
+<p>Read <code>:help filename-modifiers</code>.</p>
+<p>Read <code>:help simplify()</code>.</p>
+<p>Read <code>:help resolve()</code>.</p>
+<p>Read <code>:help globpath()</code>.</p>
+<p>Read <code>:help wildcards</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/39.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/41.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

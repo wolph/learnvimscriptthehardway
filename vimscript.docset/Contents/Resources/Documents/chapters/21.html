@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Conditionals / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#conditionals">Conditionals</a><ul>
+<li><a href="#multiple-line-statements">Multiple-Line Statements</a></li>
+<li><a href="#basic-if">Basic If</a></li>
+<li><a href="#else-and-elseif">Else and Elseif</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/20.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/22.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="conditionals">Conditionals</h1>
+<p>Every programming language has a way to branch, and in Vimscript that method is
+the <code>if</code> statement.  The <code>if</code> statement is the core of branching in Vim.
+There's no <code>unless</code> statement like Ruby, so any decision making you do in your
+coding will be done with <code>if</code>s.</p>
+<p>Before we talk about Vim's <code>if</code> statement we need to take a short detour to talk
+about syntax so we're all on the same page.</p>
+<h2 id="multiple-line-statements">Multiple-Line Statements</h2>
+<p>Sometimes you can't fit a piece of Vimscript on a single line of code.  We saw this
+when we talked about autocommand groups.  Here's a chunk of code we used before:</p>
+<div class="codehilite"><pre><span class="p">:</span>augroup testgroup
+<span class="p">:</span>    autocmd <span class="nb">BufWrite</span> * :<span class="k">echom</span> <span class="s2">"Baz"</span>
+<span class="p">:</span>augroup END
+</pre></div>
+
+
+<p>You can write this as three separate lines in a Vimscript file, which is ideal,
+but it gets tedious to write this way when running commands manually.  Instead
+you can separate each line with a pipe character (<code>|</code>).  Run the following
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"foo"</span> <span class="p">|</span> <span class="k">echom</span> <span class="s2">"bar"</span>
+</pre></div>
+
+
+<p>Vim will treat that as two separate commands.  Use <code>:messages</code> to check the log
+if you didn't see both lines appear.</p>
+<p>For the rest of this book if you want to manually run a command but don't want
+to bother typing in the newlines and colons, feel free to put it all on one line
+separated by pipes.</p>
+<h2 id="basic-if">Basic If</h2>
+<p>Now that we've got that out of the way, run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">1</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"ONE"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim will display <code>ONE</code>, because the integer <code>1</code> is "truthy".  Now try these
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">0</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"ZERO"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim will <em>not</em> display <code>ZERO</code> because the integer <code>0</code> is "falsy".  Let's see how
+strings behave.  Run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="s2">"something"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"INDEED"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>The results may surprise you.  Vim does <em>not</em> necessarily treat a non-empty
+string as "truthy", so it will not display anything!</p>
+<p>Let's dive a bit further down the rabbit hole.  Run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="s2">"9024"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"WHAT?!"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>This time Vim <em>does</em> display the text!  What's going on here?</p>
+<p>To try to wrap our heads around what's going on, run the following three commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"hello"</span> <span class="p">+</span> <span class="m">10</span>
+<span class="p">:</span><span class="k">echom</span> <span class="s2">"10hello"</span> <span class="p">+</span> <span class="m">10</span>
+<span class="p">:</span><span class="k">echom</span> <span class="s2">"hello10"</span> <span class="p">+</span> <span class="m">10</span>
+</pre></div>
+
+
+<p>The first command causes Vim to echo <code>10</code>, the second command echoes <code>20</code>, and
+the third echoes <code>10</code> again!</p>
+<p>After observing all of these commands we can draw a few informed conclusions
+about Vimscript:</p>
+<ul>
+<li>Vim will try to coerce variables (and literals) when necessary.  When <code>10 + 
+  "20foo"</code> is evaluated Vim will convert <code>"20foo"</code> to an integer (which
+  results in <code>20</code>) and then add it to <code>10</code>.</li>
+<li>Strings that start with a number are coerced to that number, otherwise they're
+  coerced to <code>0</code>.</li>
+<li>Vim will execute the body of an <code>if</code> statement when its condition evaluates to
+  a non-zero integer, <em>after</em> all coercion takes place.</li>
+</ul>
+<h2 id="else-and-elseif">Else and Elseif</h2>
+<p>Vim, like Python, supports both "else" and "else if" clauses.  Run the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">0</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"if"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"nope!"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"elseif"</span>
+<span class="p">:</span><span class="k">else</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"finally!"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim echoes <code>finally!</code> because both of the previous conditions evaluate to zero,
+which is falsy.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Drink a beer to console yourself about Vim's coercion of strings to integers.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/20.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/22.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

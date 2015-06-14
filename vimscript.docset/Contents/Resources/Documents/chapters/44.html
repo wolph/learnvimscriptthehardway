@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Detecting Filetypes / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#detecting-filetypes">Detecting Filetypes</a><ul>
+<li><a href="#detecting-potion-files">Detecting Potion Files</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/43.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/45.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="detecting-filetypes">Detecting Filetypes</h1>
+<p>Let's create a Potion file we can use as a sample as we're working on our
+plugin.  Create a <code>factorial.pn</code> file somewhere and put the following Potion
+code inside it:</p>
+<div class="codehilite"><pre>factorial = (n):
+    total = 1
+    n to 1 (i):
+        total *= i.
+    total.
+
+10 times (i):
+    i string print
+    '! is: ' print
+    factorial (i) string print
+    "\n" print.
+</pre></div>
+
+
+<p>This code creates a simple factorial function and calls it ten times, printing
+the results each time.  Go ahead and run it with <code>potion factorial.pn</code>.  The
+output should look like this:</p>
+<div class="codehilite"><pre>0! is: 0
+1! is: 1
+2! is: 2
+3! is: 6
+4! is: 24
+5! is: 120
+6! is: 720
+7! is: 5040
+8! is: 40320
+9! is: 362880
+</pre></div>
+
+
+<p>If you don't get this output, or you get an error, stop and figure out what's
+gone wrong.  The code should work exactly as-is.</p>
+<p>Take some time to understand how the code works.  Refer to the Potion docs
+liberally.  It's not critical to understanding Vimscript but it will make you
+a better programmer.</p>
+<h2 id="detecting-potion-files">Detecting Potion Files</h2>
+<p>Open <code>factorial.pn</code> in Vim and run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">filetype</span>?
+</pre></div>
+
+
+<p>Vim will display <code>filetype=</code> because it doesn't know what a <code>.pn</code> file is yet.
+Let's fix that.</p>
+<p>Create <code>ftdetect/potion.vim</code> in your plugin's repo.  Put the following lines
+into it:</p>
+<div class="codehilite"><pre><span class="k">au</span> <span class="nb">BufNewFile</span><span class="p">,</span><span class="nb">BufRead</span> *.pn <span class="k">set</span> <span class="k">filetype</span><span class="p">=</span>potion
+</pre></div>
+
+
+<p>This creates a single autocommand: a command to set the filetype of <code>.pn</code> files
+to <code>potion</code>.  Pretty straightforward.</p>
+<p>Notice that we <em>didn't</em> use an autocommand group like we usually would.  Vim
+automatically wraps the contents of <code>ftdetect/*.vim</code> files in autocommand groups
+for you, so you don't need to worry about it.</p>
+<p>Close the <code>factorial.pn</code> file and reopen it.  Now run the previous command
+again:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="k">filetype</span>?
+</pre></div>
+
+
+<p>This time Vim displays <code>filetype=potion</code>.  When Vim started up it loaded the
+autocommand group inside <code>~/.vim/bundle/potion/ftdetect/potion.vim</code>, and when it
+opened <code>factorial.pn</code> the autocommand fired, setting the <code>filetype</code> to <code>potion</code>.</p>
+<p>Now that we've taught Vim to recognize Potion files we can move on to actually
+creating some useful behavior in our plugin.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help ft</code>.  Don't worry if you don't understand everything there.</p>
+<p>Read <code>:help setfiletype</code>.</p>
+<p>Modify the Potion plugin's <code>ftdetect/potion.vim</code> script to use <code>setfiletype</code>
+instead of <code>set filetype</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/43.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/45.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Execute Normal! / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#execute-normal">Execute Normal!</a><ul>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/29.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/31.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="execute-normal">Execute Normal!</h1>
+<p>Now that we've seen <code>execute</code> and <code>normal!</code> we can talk about a common Vimscript
+idiom in more detail.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg/foo\&lt;cr&gt;dd"</span>
+</pre></div>
+
+
+<p>This will move to the top of the file, search for the first occurrence of <code>foo</code>,
+and delete the line that contains it.</p>
+<p>Previously we tried to use <code>normal!</code> with a search command but couldn't enter
+the return needed to actually perform the search.  Combining <code>normal!</code> with
+<code>execute</code> fixes that problem.</p>
+<p><code>execute</code> lets you build commands programmatically, so you can use Vim's normal
+string escape sequences to generate the non-printing characters you need.  Try
+the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! mqA;\&lt;esc&gt;`q"</span>
+</pre></div>
+
+
+<p>What does this do?  Let's break it apart:</p>
+<ul>
+<li><code>:execute "normal! ..."</code>: run the sequence of commands as if they were entered
+  in normal mode, ignoring all mappings, and replacing string escape sequences
+  with their results.</li>
+<li><code>mq</code>: store the current location in mark "q".</li>
+<li><code>A</code>: move to the end of the current line and enter insert mode after the last
+  character.</li>
+<li><code>;</code>: we're now in insert mode, so just put a literal semicolon in the file.</li>
+<li><code>\&lt;esc&gt;</code>: this is a string escape sequence which resolves to a press of the
+  escape key, which takes us out of insert mode.</li>
+<li><code>`q</code>: return to the exact location of mark "q".</li>
+</ul>
+<p>It looks a bit scary but it's actually quite useful: it puts a semicolon at the
+end of the current line while leaving your cursor in place.  A mapping for this
+could come in handy if you forget a semicolon when writing Javascript, C, or any
+other language with semicolons as statement terminators.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help expr-quote</code> again (you've seen it before) to remind yourself how to
+use string escapes to pass special characters to <code>normal!</code> with <code>execute</code>.</p>
+<p>Put down this book for a while before you go on to the next chapter.  Get
+a sandwich or a cup of coffee, feed your pets if you have them, and relax for
+a bit before continuing.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/29.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/31.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

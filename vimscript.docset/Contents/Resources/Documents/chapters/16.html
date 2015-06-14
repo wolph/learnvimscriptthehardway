@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>More Operator-Pending Mappings / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#more-operator-pending-mappings">More Operator-Pending Mappings</a><ul>
+<li><a href="#normal">Normal</a></li>
+<li><a href="#execute">Execute</a></li>
+<li><a href="#results">Results</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/15.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/17.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="more-operator-pending-mappings">More Operator-Pending Mappings</h1>
+<p>The idea of operators and movements is one of the most important concepts in Vim,
+and it's one of the biggest reasons Vim is so efficient.  We're going to
+practice defining new motions a bit more, because extending this powerful idea
+makes Vim even <em>more</em> powerful.</p>
+<p>Let's say you're writing some text in Markdown.  If you haven't used Markdown
+before, don't worry, for our purposes here it's very simple.  Type the following
+into a file:</p>
+<div class="codehilite"><pre><span class="gh">Topic One</span>
+<span class="gh">=========</span>
+
+This is some text about topic one.
+
+It has multiple paragraphs.
+
+<span class="gh">Topic Two</span>
+<span class="gh">=========</span>
+
+This is some text about topic two.  It has only one paragraph.
+</pre></div>
+
+
+<p>The lines "underlined" with <code>=</code> characters are treated as headings by Markdown.
+Let's create some mappings that let us target headings with movements.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap ih :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>execute <span class="s2">"normal! ?^==\\+$\r:nohlsearch\rkvg_"</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>This mapping is pretty complicated, so put your cursor in one of the paragraphs
+(not the headings) and type <code>cih</code>.  Vim will delete the heading of whatever
+section you're in and put you in insert mode ("change inside heading").</p>
+<p>It uses some things we've never seen before, so let's look at each piece
+individually.  The first part of the mapping, <code>:onoremap ih</code> is just the mapping
+command that we've seen before, so we'll skip over that.  We'll keep ignoring
+the <code>&lt;c-u&gt;</code> for the moment as well.</p>
+<p>Now we're looking at the remainder of the line:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! ?^==\\+$\r:nohlsearch\rkvg_"</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<h2 id="normal">Normal</h2>
+<p>The <code>:normal</code> command takes a set of characters and performs whatever action
+they would do if they were typed in normal mode.  We'll go into greater detail
+in a later chapter, but we've seen it a few times already so it's time to at
+least get a taste.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>normal gg
+</pre></div>
+
+
+<p>Vim will move you to the top of the file.  Now run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>normal <span class="p">&gt;&gt;</span>
+</pre></div>
+
+
+<p>Vim will indent the current line.</p>
+<p>For now, don't worry about the <code>!</code> after <code>normal</code> in our mapping.  We'll talk
+about that later.</p>
+<h2 id="execute">Execute</h2>
+<p>The <code>execute</code> command takes a Vimscript string (which we'll cover in more detail
+later) and performs it as a command.  Run this:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"write"</span>
+</pre></div>
+
+
+<p>Vim will write your file, just as if you had typed <code>:write&lt;cr&gt;</code>.  Now run this
+command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg"</span>
+</pre></div>
+
+
+<p>Vim will run <code>:normal! gg</code>, which as we just saw will move you to the top of the
+file.  But why bother with this when we could just run the <code>normal!</code> command
+itself?</p>
+<p>Look at the following command and try to guess what it will do:</p>
+<div class="codehilite"><pre><span class="p">:</span>normal<span class="p">!</span> gg/<span class="k">a</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>It seems like it should:</p>
+<ul>
+<li>Move to the top of the file.</li>
+<li>Start a search.</li>
+<li>Fill in "a" as the target to search for.</li>
+<li>Press return to perform the search.</li>
+</ul>
+<p>Run it.  Vim will move to the top of the file and nothing else!</p>
+<p>The problem is that <code>normal!</code> doesn't recognize "special characters" like
+<code>&lt;cr&gt;</code>.  There are a number of ways around this, but the easiest to use and read
+is <code>execute</code>.</p>
+<p>When <code>execute</code> looks at the string you tell it to run, it will substitute any
+special characters it finds <em>before</em> running it.  In this case, <code>\r</code> is an
+escape sequence that means "carriage return".  The double backslash is also an
+escape sequence that puts a literal backslash in the string.</p>
+<p>If we perform this replacement in our mapping and look at the result we can see
+that the mapping is going to perform:</p>
+<div class="codehilite"><pre>:normal! ?^==\+$&lt;cr&gt;:nohlsearch&lt;cr&gt;kvg_
+                ^^^^           ^^^^
+                 ||             ||
+These are ACTUAL carriage returns, NOT the four characters
+"left angle bracket", "c", "r", and "right angle bracket".
+</pre></div>
+
+
+<p>So now <code>normal!</code> will execute these characters as if we had typed them in normal
+mode.  Let's split them apart at the returns to find out what they're doing:</p>
+<div class="codehilite"><pre>?^<span class="p">==</span>\<span class="p">+</span>$
+<span class="p">:</span><span class="k">nohlsearch</span>
+kvg_
+</pre></div>
+
+
+<p>The first piece, <code>?^==\+$</code> performs a search backwards for any line that
+consists of two or more equal signs and nothing else. This will leave our cursor
+on the first character of the line of equal signs.</p>
+<p>We're searching backwards because when you say "change inside heading" while
+your cursor is in a section of text, you probably want to change the heading for
+<em>that</em> section, not the next one.</p>
+<p>The second piece is the <code>:nohlsearch</code> command.  This simply clears the search
+highlighting from the search we just performed so it's not distracting.</p>
+<p>The final piece is a sequence of three normal mode commands:</p>
+<ul>
+<li><code>k</code>: move up a line.  Since we were on the first character of the line of
+  equal signs, we're now on the first character of the heading text.</li>
+<li><code>v</code>: enter (characterwise) visual mode.</li>
+<li><code>g_</code>: move to the last non-blank character of the current line.  We use this
+  instead of <code>$</code> because <code>$</code> would highlight the newline character as well, and
+  this isn't what we want.</li>
+</ul>
+<h2 id="results">Results</h2>
+<p>That was a lot of work, but now we've looked at each part of the mapping.  To
+recap:</p>
+<ul>
+<li>We created a operator-pending mapping for "inside this section's heading".</li>
+<li>We used <code>execute</code> and <code>normal!</code> to run the normal commands we needed to select
+  the heading, and allowing us to use special characters in those.</li>
+<li>Our mapping searches for the line of equal signs which denotes a heading and
+  visually selects the heading text above that.</li>
+<li>Vim handles the rest.</li>
+</ul>
+<p>Let's look at one more mapping before we move on.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap ah :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>execute <span class="s2">"normal! ?^==\\+\r:nohlsearch\rg_vk0"</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Try it by putting your cursor in a section's text and typing <code>cah</code>.  This time
+Vim will delete not only the heading's text but also the line of equal signs
+that denotes a heading.  You can think of this movement as "<em>around</em> this
+section's heading".</p>
+<p>What's different about this mapping?  Let's look at them side by side:</p>
+<div class="codehilite"><pre><span class="p">:</span>onoremap ih :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>execute <span class="s2">"normal! ?^==\\+$\r:nohlsearch\rkvg_"</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+<span class="p">:</span>onoremap ah :<span class="p">&lt;</span><span class="k">c</span><span class="p">-</span><span class="k">u</span><span class="p">&gt;</span>execute <span class="s2">"normal! ?^==\\+$\r:nohlsearch\rg_vk0"</span><span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>The only difference from the previous mapping is the very end, where we select
+the text to operate on:</p>
+<div class="codehilite"><pre>inside heading: kvg_
+around heading: g_vk0
+</pre></div>
+
+
+<p>The rest of the mapping is the same, so we still start on the first character of
+the line of equal signs.  From there:</p>
+<ul>
+<li><code>g_</code>: move to the last non-blank character in the line.</li>
+<li><code>v</code>: enter (characterwise) visual mode.</li>
+<li><code>k</code>: move up a line.  This puts us on the line containing the heading's text.</li>
+<li><code>0</code>: move to the first character of the line.</li>
+</ul>
+<p>The result is that both the text and the equal signs end up visually selected,
+and Vim performs the operation on both.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Markdown can also have headings delimited with lines of <code>-</code> characters.  Adjust
+the regex in these mappings to work for either type of heading.  You may want to
+check out <code>:help pattern-overview</code>.  Remember that the regex is inside of
+a string, so backslashes will need to be escaped.</p>
+<p>Add two autocommands to your <code>~/.vimrc</code> file that will create these mappings.
+Make sure to only map them in the appropriate buffers, and make sure to group
+them so they don't get duplicated each time you source the file.</p>
+<p>Read <code>:help normal</code>.</p>
+<p>Read <code>:help execute</code>.</p>
+<p>Read <code>:help expr-quote</code> to see the escape sequences you can use in strings.</p>
+<p>Create a "inside next email address" operator-pending mapping so you can say
+"change inside next email address".  <code>in@</code> is a good candidate for the keys to
+map. You'll probably want to use <code>/...some regex...&lt;cr&gt;</code> for this.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/15.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/17.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

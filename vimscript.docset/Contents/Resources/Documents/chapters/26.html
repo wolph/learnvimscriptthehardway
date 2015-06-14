@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Strings / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#strings">Strings</a><ul>
+<li><a href="#concatenation">Concatenation</a></li>
+<li><a href="#special-characters">Special Characters</a></li>
+<li><a href="#literal-strings">Literal Strings</a></li>
+<li><a href="#truthiness">Truthiness</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/25.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/27.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="strings">Strings</h1>
+<p>The next type of variable we'll look at is the String.  Since Vim is all about
+manipulating text you'll be using this one quite a bit.</p>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"Hello"</span>
+</pre></div>
+
+
+<p>Vim will echo <code>Hello</code>.  So far, so good.</p>
+<h2 id="concatenation">Concatenation</h2>
+<p>One of the most common things you'll want to do with strings is adding them
+together.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"Hello, "</span> <span class="p">+</span> <span class="s2">"world"</span>
+</pre></div>
+
+
+<p>What happened?  Vim displayed <code>0</code> for some reason!</p>
+<p>Here's the issue: Vim's <code>+</code> operator is <em>only</em> for Numbers.  When you pass
+a string to <code>+</code> Vim will try to coerce it to a Number before performing the
+addition.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"3 mice"</span> <span class="p">+</span> <span class="s2">"2 cats"</span>
+</pre></div>
+
+
+<p>This time Vim displays <code>5</code>, because the strings are coerced to the numbers <code>3</code>
+and <code>2</code> respectively.</p>
+<p>When I said "Number" I really <em>meant</em> Number.  Vim will <em>not</em> coerce strings to
+Floats!  Try this command to see prove this:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">10</span> <span class="p">+</span> <span class="s2">"10.10"</span>
+</pre></div>
+
+
+<p>Vim displays <code>20</code> because it dropped everything after the decimal point when
+coercing <code>10.10</code> to a Number.</p>
+<p>To combine strings you need to use the concatenation operator.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"Hello, "</span> . <span class="s2">"world"</span>
+</pre></div>
+
+
+<p>This time Vim displays <code>Hello, world</code>.  <code>.</code> is the "concatenate strings"
+operator in Vim, which lets you combine strings.  It doesn't add whitespace or
+anything else in between.</p>
+<p>Coercion works both ways.  Kind of.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">10</span> . <span class="s2">"foo"</span>
+</pre></div>
+
+
+<p>Vim will display <code>10foo</code>.  First it coerces <code>10</code> to a String, then it
+concatenates it with the string on the right hand side.  Things get a bit
+stickier when we're working with Floats, though.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="m">10</span>.<span class="m">1</span> . <span class="s2">"foo"</span>
+</pre></div>
+
+
+<p>This time Vim throws an error, saying we're using a Float as a String.  Vim will
+happily let you use a String as a Float when performing addition, but <em>won't</em>
+let you use a Float as a String when concatenating.</p>
+<p>The moral of this story is that Vim is a lot like Javascript: it allows you to
+play fast and loose with types sometimes, but it's a really bad idea to do so
+because it will come back to bite you at some point.</p>
+<p>When writing Vimscript, make sure you know what the type of each of your
+variables is.  If you need to change that type you should use a function to
+explicitly change it, even if it's not strictly necessary at the moment.  Don't
+rely on Vim's coercion because at some point you <em>will</em> regret it.</p>
+<h2 id="special-characters">Special Characters</h2>
+<p>Like most programming languages, Vimscript lets you use escape sequences in
+strings to represent hard-to-type characters.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"foo \"bar\""</span>
+</pre></div>
+
+
+<p>The <code>\"</code> in the string is replaced with a double quote character, as you would
+probably expect.  Escape sequences work mostly as you would expect.  Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"foo\\bar"</span>
+</pre></div>
+
+
+<p>Vim displays <code>foo\bar</code>, because <code>\\</code> is the escape sequence for a literal
+backslash, just like in most programming languages.  Now run the following
+command (note that it's an <code>echo</code> and <em>not</em> an <code>echom</code>):</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="s2">"foo\nbar"</span>
+</pre></div>
+
+
+<p>This time Vim will display two lines, <code>foo</code> and <code>bar</code>, because the <code>\n</code> is
+replaced with a newline.  Now try running this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"foo\nbar"</span>
+</pre></div>
+
+
+<p>Vim will display something like <code>foo^@bar</code>.  When you use <code>echom</code> instead of
+<code>echo</code> with a String Vim will echo the <em>exact</em> characters of the string, which
+sometimes means that it will show a different representation than plain old
+<code>echo</code>.  <code>^@</code> is Vim's way of saying "newline character".</p>
+<h2 id="literal-strings">Literal Strings</h2>
+<p>Vim also lets you use "literal strings" to avoid excessive use of escape
+sequences.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s1">'\n\\'</span>
+</pre></div>
+
+
+<p>Vim displays <code>\n\\</code>.  Using single quotes tells Vim that you want the string
+<em>exactly</em> as-is, with no escape sequences.  The one exception is that two single
+quotes in a row will produce one single quote.  Try this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s1">'That''s enough.'</span>
+</pre></div>
+
+
+<p>Vim will display <code>That's enough.</code>.  Two single quotes is the <em>only</em> sequence
+that has special meaning in a literal string.</p>
+<p>We'll revisit literal strings when they become most useful, later in the book
+(when we dive into regular expressions).</p>
+<h2 id="truthiness">Truthiness</h2>
+<p>You might be wondering how Vim treats strings when used in an <code>if</code> statement.
+Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span>
+<span class="p">:</span>  echo <span class="s2">"yes"</span>
+<span class="p">:</span><span class="k">else</span>
+<span class="p">:</span>  echo <span class="s2">"no"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim will display <code>no</code>.  If you're wondering why this happens you should reread
+the chapter on conditionals, because we talked about it there.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help expr-quote</code>.  Review the list of escape sequences you can use in
+a normal Vim string.  Find out how to insert a tab character.</p>
+<p>Try to figure out a way to insert a tab character into a string <em>without</em> using
+an escape sequence.  Read <code>:help i_CTRL-V</code> for a hint.</p>
+<p>Read <code>:help literal-string</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/25.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/27.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

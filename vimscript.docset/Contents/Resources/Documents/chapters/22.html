@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Comparisons / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#comparisons">Comparisons</a><ul>
+<li><a href="#case-sensitivity">Case Sensitivity</a></li>
+<li><a href="#code-defensively">Code Defensively</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/21.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/23.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="comparisons">Comparisons</h1>
+<p>We've gone over conditionals, but <code>if</code> statements aren't very useful if we can't
+compare things.  Of course Vim lets us compare values, but it's not as
+straightforward as it may seem.</p>
+<p>Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">10</span> <span class="p">&gt;</span> <span class="m">1</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"foo"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim will, of course, display <code>foo</code>.  Now run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">10</span> <span class="p">&gt;</span> <span class="m">2001</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"bar"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim displays nothing, because <code>10</code> is not greater than <code>2001</code>.  So far
+everything works as expected.  Run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="m">10</span> <span class="p">==</span> <span class="m">11</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"first"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="m">10</span> <span class="p">==</span> <span class="m">10</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"second"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim displays <code>second</code>.  Nothing surprising here.  Let's try comparing strings.
+Run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"bar"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"one"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"foo"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"two"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim echoes <code>two</code>.  There's still nothing surprising, so what was I going on
+about at the beginning of the chapter?</p>
+<h2 id="case-sensitivity">Case Sensitivity</h2>
+<p>Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">noignorecase</span>
+<span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"FOO"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"vim is case insensitive"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"foo"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"vim is case sensitive"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim evaluates the <code>elseif</code>, so apparently Vimscript is case sensitive.  Good to
+know, but nothing earth-shattering.  Now run these commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">ignorecase</span>
+<span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"FOO"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"no, it couldn't be"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"foo"</span> <span class="p">==</span> <span class="s2">"foo"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"this must be the one"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p><strong>Whoa</strong>.  Stop right there.  Yes, you saw that right.</p>
+<p><strong>The behavior of <code>==</code> depends on a user's settings.</strong></p>
+<p>I promise I'm not messing with you.  Try it again and see.  I'm not kidding,
+I can't make this stuff up.</p>
+<h2 id="code-defensively">Code Defensively</h2>
+<p>What does this mean?  It means that you can <em>never</em> trust the <code>==</code> comparison
+when writing a plugin for other people to use.  A bare <code>==</code> should <em>never</em>
+appear in your plugins' code.</p>
+<p>This idea is the same as the "<code>nmap</code> versus <code>nnoremap</code>" one.  <em>Never</em> trust your
+users' settings.  Vim is old, vast, and complicated.  When writing a plugin you
+<em>have</em> to assume that users will have every variation of every setting.</p>
+<p>So how can you get around this ridiculousness?  It turns out that Vim has <em>two
+extra sets</em> of comparison operators to deal with this.</p>
+<p>Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">noignorecase</span>
+<span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span> <span class="p">==</span>? <span class="s2">"FOO"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"first"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"foo"</span> <span class="p">==</span>? <span class="s2">"foo"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"second"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim displays <code>first</code> because <code>==?</code> is the "case-insensitive no matter what the
+user has set" comparison operator.  Now run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">ignorecase</span>
+<span class="p">:</span><span class="k">if</span> <span class="s2">"foo"</span> <span class="p">==</span># <span class="s2">"FOO"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"one"</span>
+<span class="p">:</span><span class="k">elseif</span> <span class="s2">"foo"</span> <span class="p">==</span># <span class="s2">"foo"</span>
+<span class="p">:</span>    <span class="k">echom</span> <span class="s2">"two"</span>
+<span class="p">:</span><span class="k">endif</span>
+</pre></div>
+
+
+<p>Vim displays <code>two</code> because <code>==#</code> is the "case-sensitive no matter what the user
+has set" comparison operator.</p>
+<p>The moral of this story is that you should <em>always</em> use explicit case sensitive
+or insensitive comparisons.  Using the normal forms is <em>wrong</em> and it <em>will</em>
+break at some point.  Save yourself the trouble and type the extra character.</p>
+<p>When you're comparing integers this distinction obviously doesn't matter.
+Still, I feel that it's better to use the case-sensitive comparisons everywhere
+(even where they're not strictly needed), than to forget them in a place that
+they <em>are</em> needed.</p>
+<p>Using <code>==#</code> and <code>==?</code> with integers will work just fine, and if you change them
+to strings in the future it will work correctly.  If you'd rather use <code>==</code> for
+integers that's fine, just remember that you'll need to change the comparison if
+you change them to strings in the future.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Play around with <code>:set ignorecase</code> and <code>:set noignorecase</code> and see how various
+comparisons act.</p>
+<p>Read <code>:help ignorecase</code> to see why someone might set that option.</p>
+<p>Read <code>:help expr4</code> to see all the available comparison operators.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/21.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/23.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

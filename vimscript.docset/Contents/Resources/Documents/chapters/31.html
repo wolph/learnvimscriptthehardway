@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Basic Regular Expressions / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#basic-regular-expressions">Basic Regular Expressions</a><ul>
+<li><a href="#highlighting">Highlighting</a></li>
+<li><a href="#searching">Searching</a></li>
+<li><a href="#magic">Magic</a></li>
+<li><a href="#literal-strings">Literal Strings</a></li>
+<li><a href="#very-magic">Very Magic</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/30.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/32.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="basic-regular-expressions">Basic Regular Expressions</h1>
+<p>Vim is a text editor, which means that a great deal of your Vimscript code will
+be dedicated to working with text.  Vim has powerful support for regular
+expressions, but as usual there are some quirks.</p>
+<p>Type the following text into a buffer:</p>
+<div class="codehilite"><pre>max = 10
+
+print "Starting"
+
+for i in range(max):
+    print "Counter:", i
+
+print "Done"
+</pre></div>
+
+
+<p>This is the text we'll use to experiment with Vimscript's regex support.  It
+happens to be Python code, but don't worry if you don't know Python.  It's just
+an example.</p>
+<p>I'm going to assume that you know the basics of regular expressions.  If you
+don't you should stop reading this book and start reading <a href="http://regex.learncodethehardway.org/">Learn Regex the Hard
+Way</a> by Zed Shaw.  Come back when you're done with that.</p>
+<h2 id="highlighting">Highlighting</h2>
+<p>Before we start we need to turn on search highlighting so we can see what we're
+doing.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">hlsearch</span> <span class="nb">incsearch</span>
+</pre></div>
+
+
+<p><code>hlsearch</code> tells Vim to highlight all matches in a file when you perform
+a search, and <code>incsearch</code> tells Vim to highlight the <em>next</em> match while you're
+still typing out your search pattern.</p>
+<h2 id="searching">Searching</h2>
+<p>Put your cursor at the top of the file and run the following command:</p>
+<div class="codehilite"><pre>/print
+</pre></div>
+
+
+<p>As you type in each letter, Vim will start highlighting them in the first line.
+When you press return to execute the search <em>all</em> the instances of <code>print</code> will
+be highlighted and your cursor will be moved to the next match.</p>
+<p>Now try running the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg/print\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>This will go to the top of the file and perform a search for <code>print</code>, putting us
+at the first match.  It does this using <code>:execute "normal! ..."</code> which we saw in
+the previous chapter.</p>
+<p>To get to the second match in the file you can just add more commands onto the
+end of the string.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg/print\&lt;cr&gt;n"</span>
+</pre></div>
+
+
+<p>Vim will put the cursor on the second <code>print</code> in the buffer (and all the matches
+will be highlighted).</p>
+<p>Let's try going in the opposite direction.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! G?print\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>This time we move to the bottom of the file with <code>G</code> and use <code>?</code> to search
+backward instead of forward.</p>
+<p>All of these searching commands should be familiar -- we're mostly going over
+them to get you used to the <code>:execute "normal! ..."</code> idiom, because it will let
+you do anything you know how to do in vanilla Vim in your Vimscript code.</p>
+<h2 id="magic">Magic</h2>
+<p>The <code>/</code> and <code>?</code> commands actually take regular expressions, not just literal
+characters.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg/for .+ in .+:\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>Vim complains that the pattern is not found!  I told you that Vim supports
+regular expressions in searches, so what's going on?  Try the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg/for .\\+ in .\\+:\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>This time Vim highlights the "for" loop as we expected in the first place.  Take
+a minute and try to think about what exactly changed before moving on.  Remember
+that <code>execute</code> takes a String.</p>
+<p>The answer is that there are two reasons we needed to write the command like we
+did:</p>
+<ul>
+<li>First, <code>execute</code> takes a String, so the double backslashes we used turn into
+  single backslashes by the time they get to <code>normal!</code>.</li>
+<li>Vim has <em>four</em> different "modes" of parsing regular expressions!  The default
+  mode requires a backslash before the <code>+</code> character to make it mean "1 or more
+  of the preceding character" instead of "a literal plus sign".</li>
+</ul>
+<p>You can see this a bit easier by just running the search in Vim directly.  Type
+the following command and press return:</p>
+<div class="codehilite"><pre>/print .\<span class="p">+</span>
+</pre></div>
+
+
+<p>You can see the <code>\+</code> working its magic now.  The double backslashes were only
+used because we were passing the pattern as a String to <code>execute</code>.</p>
+<h2 id="literal-strings">Literal Strings</h2>
+<p>As we mentioned in the chapter on Strings, Vim allows you to use single quotes
+to define a "literal string" that passes through characters directly.  For
+example, the string <code>'a\nb'</code> is four characters long.</p>
+<p>Can we use literal strings to avoid having to type those double backslashes?
+Think about this for a minute or two before you move on, because the answer is
+a bit more complicated that you might think.</p>
+<p>Try running the following command (note the single quotes and single backslashes
+this time):</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s1">'normal! gg/for .\+ in .\+:\&lt;cr&gt;'</span>
+</pre></div>
+
+
+<p>Vim moves you to the top of the file but doesn't move you to the first match.
+Is this what you expected?</p>
+<p>The command doesn't work because we need the <code>\&lt;cr&gt;</code> in the pattern to be
+escaped into a real carriage return character, which tells the search command to
+actually run.  Because we're in a literal string, it's the equivalent of typing
+<code>/for .\+ in .\+:\&lt;cr&gt;</code> in vanilla Vim, which obviously isn't what we want.</p>
+<p>All hope is not lost, though!  Remember that Vim allows you to concatenate
+strings, so for larger commands we can use this to split apart the string into
+easier to read chunks.  Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg"</span> . <span class="s1">'/for .\+ in .\+:'</span> . <span class="s2">"\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>This concatenates the three smaller strings before sending them to <code>execute</code>,
+and lets us use a literal string for the regex while using normal strings for
+everything else.</p>
+<h2 id="very-magic">Very Magic</h2>
+<p>You may be wondering about Vimscript's four different modes of regex parsing and
+how they're different from the regular expressions you're used to from languages
+like Python, Perl or Ruby.  You can read their documentation if you really want
+to, but if you want the sane, easy solution just read on.</p>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"normal! gg"</span> . <span class="s1">'/\vfor .+ in .+:'</span> . <span class="s2">"\&lt;cr&gt;"</span>
+</pre></div>
+
+
+<p>We've split the pattern out from the rest of the command into its own literal
+string again, and this time we started the pattern with <code>\v</code>.  This tells Vim to
+use its "very magic" regex parsing mode, which is pretty much the same as you're
+used to in any other programming language.</p>
+<p>If you simply start all of your regular expressions with <code>\v</code> you'll never need
+to worry about Vimscript's three other crazy regex modes.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help magic</code> carefully.</p>
+<p>Read <code>:help pattern-overview</code> to see the kinds of things Vim regexes support.
+Stop reading after the character classes.</p>
+<p>Read <code>:help match</code>.  Try running the <code>:match Error /\v.../</code> command a few times
+by hand.</p>
+<p>Edit your <code>~/.vimrc</code> file to add a mapping that will use <code>match</code> to highlight
+trailing whitespace as an error.  A good key to use might be <code>&lt;leader&gt;w</code>.</p>
+<p>Add another mapping that will clear the match (perhaps <code>&lt;leader&gt;W</code>).</p>
+<p>Add a normal mode mapping that will automatically insert the <code>\v</code> for you
+whenever you begin a search.  If you're stuck remember that Vim's mappings are
+extremely simple and you just need to tell it which keys to press when you use
+the mapped key.</p>
+<p>Add the <code>hlsearch</code> and <code>incsearch</code> options to your <code>~/.vimrc</code> file, set however
+you prefer.</p>
+<p>Read <code>:help nohlsearch</code>.  Note that this is a <em>command</em> and <em>not</em> the "off mode"
+setting of <code>hlsearch</code>!</p>
+<p>Add a mapping to "stop highlighting items from the last search" to your
+<code>~/.vimrc</code> file.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/30.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/32.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

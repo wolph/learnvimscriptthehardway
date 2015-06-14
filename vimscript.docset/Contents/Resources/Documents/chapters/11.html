@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Buffer-Local Options and Mappings / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#buffer-local-options-and-mappings">Buffer-Local Options and Mappings</a><ul>
+<li><a href="#mappings">Mappings</a></li>
+<li><a href="#local-leader">Local Leader</a></li>
+<li><a href="#settings">Settings</a></li>
+<li><a href="#shadowing">Shadowing</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/10.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/12.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="buffer-local-options-and-mappings">Buffer-Local Options and Mappings</h1>
+<p>Now we're going to take a few minutes to revisit three things we've already
+talked about: mappings, abbreviations, and options, but with a twist.  We're
+going to set each of them in a single buffer at a time.</p>
+<p>The true power of this idea will become apparent in the next chapter, but we
+need to lay the groundwork for it now.</p>
+<p>For this chapter you'll need to open two files in Vim, each in its own split.
+I'll call them <code>foo</code> and <code>bar</code>, but you can name them whatever you like.  Put
+some text into each of them.</p>
+<h2 id="mappings">Mappings</h2>
+<p>Switch to file <code>foo</code> and run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span>          <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">d</span> dd
+<span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">x</span> dd
+</pre></div>
+
+
+<p>Now stay in file <code>foo</code>, make sure you're in normal mode, and type <code>&lt;leader&gt;d</code>.
+Vim will delete a line.  This is nothing new.</p>
+<p>Still in file <code>foo</code>, type <code>&lt;leader&gt;x</code>.  Vim will delete a line again.  This
+makes sense because we mapped <code>&lt;leader&gt;x</code> to <code>dd</code> as well.</p>
+<p>Now move over to file <code>bar</code>.  While in normal mode, type <code>&lt;leader&gt;d</code>.  Again,
+Vim deletes the current line.  Nothing surprising here either.</p>
+<p>Now for the twist: while still in file <code>bar</code>, type <code>&lt;leader&gt;x</code>.</p>
+<p>Instead of deleting the entire line, Vim just deleted a single character!
+What happened?</p>
+<p>The <code>&lt;buffer&gt;</code> in the second <code>nnoremap</code> command told Vim to only consider that
+mapping when we're in the buffer where we defined it.</p>
+<p>When you typed <code>&lt;leader&gt;x</code> in file <code>bar</code> Vim couldn't find a mapping that
+matched it, so it treated it as two commands: <code>&lt;leader&gt;</code> (which does nothing on
+its own) and <code>x</code> (the normal command to delete a single character.)</p>
+<h2 id="local-leader">Local Leader</h2>
+<p>In our example we used <code>&lt;leader&gt;x</code> for our buffer-local mapping, but this is bad
+form.  In general, when you create a mapping that only applies to specific
+buffers you should use <code>&lt;localleader&gt;</code> instead of <code>&lt;leader&gt;</code>.</p>
+<p>Using two separate leader keys provides a sort of "namespacing" that will help
+you keep all your various mappings straight in your head.</p>
+<p>It's even more important when you're writing a plugin for other people to use.
+The convention of using <code>&lt;localleader&gt;</code> for local mappings will prevent your
+plugin from overwriting someone else's <code>&lt;leader&gt;</code> mapping that they've
+painstakingly burned into their fingers over time.</p>
+<h2 id="settings">Settings</h2>
+<p>In one of the earliest chapters of the book we talked about settings options
+with <code>set</code>.  Some options always apply to all of Vim, but others can be set on
+a per-buffer basis.</p>
+<p>Switch to file <code>foo</code> and run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">setlocal</span> <span class="nb">wrap</span>
+</pre></div>
+
+
+<p>Now switch to file <code>bar</code> and run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">setlocal</span> <span class="nb">nowrap</span>
+</pre></div>
+
+
+<p>Make your Vim window smaller and you'll see that the lines in <code>foo</code> wrap, but
+the lines in <code>bar</code> don't.</p>
+<p>Let's try another option.  Switch to <code>foo</code> and run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">setlocal</span> <span class="k">number</span>
+</pre></div>
+
+
+<p>Now switch over to <code>bar</code> and run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">setlocal</span> <span class="nb">nonumber</span>
+</pre></div>
+
+
+<p>You now have line numbers in <code>foo</code> but not in <code>bar</code>.</p>
+<p>Not all options can be used with <code>setlocal</code>.  To see if you can set a particular
+option locally, read its <code>:help</code>.</p>
+<p>I've glossed over a bit of detail about how local options <em>actually</em> work for
+now.  In the exercises you'll learn more about the gory details.</p>
+<h2 id="shadowing">Shadowing</h2>
+<p>Before we move on, let's look at a particularly interesting property of local
+mappings.  Switch over to <code>foo</code> and run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>buffer<span class="p">&gt;</span> Q <span class="k">x</span>
+<span class="p">:</span><span class="nb">nnoremap</span>          Q dd
+</pre></div>
+
+
+<p>Now type <code>Q</code>.  What happens?</p>
+<p>When you press <code>Q</code>, Vim will run the first mapping, not the second, because the
+first mapping is <em>more specific</em> than the second.</p>
+<p>Switch to file <code>bar</code> and type <code>Q</code> to see that Vim uses the second mapping,
+because it's not shadowed by the first in this buffer.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help local-options</code>.</p>
+<p>Read <code>:help setlocal</code>.</p>
+<p>Read <code>:help map-local</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/10.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/12.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

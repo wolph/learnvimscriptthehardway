@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Toggling / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#toggling">Toggling</a><ul>
+<li><a href="#toggling-options">Toggling Options</a></li>
+<li><a href="#toggling-other-things">Toggling Other Things</a></li>
+<li><a href="#improvements">Improvements</a></li>
+<li><a href="#restoring-windowsbuffers">Restoring Windows/Buffers</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/37.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/39.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="toggling">Toggling</h1>
+<p>In one of the first chapters we talked about how to set options in Vim.  For
+boolean options we can use <code>set someoption!</code> to "toggle" the option.  This is
+especially nice when we create a mapping for that command.</p>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span>N :<span class="k">setlocal</span> <span class="k">number</span><span class="p">!&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>Try it out by pressing <code>&lt;leader&gt;N</code> in normal mode.  Vim will toggle the line
+numbers for the current window off and on.  Creating a "toggle" mapping like
+this is really handy, because we don't need to have two separate keys to turn
+something off and on.</p>
+<p>Unfortunately this only works for boolean options.  If we want to toggle
+a non-boolean option we'll need to do a bit more work.</p>
+<h2 id="toggling-options">Toggling Options</h2>
+<p>Let's start by creating a function that will toggle an option for us, and
+a mapping that will call it.  Put the following into your <code>~/.vimrc</code> file (or
+a separate file in <code>~/.vim/plugin/</code> if you prefer):</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">f</span> :<span class="k">call</span> FoldColumnToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> FoldColumnToggle<span class="p">()</span>
+    <span class="k">echom</span> &amp;<span class="nb">foldcolumn</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write and source the file, then try it out by pressing <code>&lt;leader&gt;f</code>  Vim will
+display the current value of the <code>foldcolumn</code> option.  Go ahead and read <code>:help
+foldcolumn</code> if you're unfamiliar with this option.</p>
+<p>Let's add in the actual toggling functionality.  Edit the code to look like
+this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">f</span> :<span class="k">call</span> FoldColumnToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> FoldColumnToggle<span class="p">()</span>
+    <span class="k">if</span> &amp;<span class="nb">foldcolumn</span>
+        <span class="k">setlocal</span> <span class="nb">foldcolumn</span><span class="p">=</span><span class="m">0</span>
+    <span class="k">else</span>
+        <span class="k">setlocal</span> <span class="nb">foldcolumn</span><span class="p">=</span><span class="m">4</span>
+    <span class="k">endif</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write and source the file and try it out.  Each time you press it Vim will
+either show or hide the fold column.</p>
+<p>The <code>if</code> statement simply checks if <code>&amp;foldcolumn</code> is truthy (remember that Vim
+treats the integer 0 as falsy and any other number as truthy).  If so, it sets
+it to zero (which hides it).  Otherwise it sets it to four.  Pretty simple.</p>
+<p>You can use a simple function like this to toggle any option where <code>0</code> means
+"off" and any other number is "on".</p>
+<h2 id="toggling-other-things">Toggling Other Things</h2>
+<p>Options aren't the only thing we might want to toggle.  One particularly nice
+thing to have a mapping for is the quickfix window.  Let's start with the same
+skeleton as before.  Add the following code to your file:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">q</span> :<span class="k">call</span> QuickfixToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> QuickfixToggle<span class="p">()</span>
+    <span class="k">return</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>This mapping doesn't do anything yet.  Let's transform it into something
+slightly more useful (but not completely finished yet).  Change the code to
+look like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">q</span> :<span class="k">call</span> QuickfixToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> QuickfixToggle<span class="p">()</span>
+    <span class="k">copen</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write and source the file.  If you try out the mapping now you'll see that it
+simply opens the quickfix window.</p>
+<p>To get the "toggling" behavior we're looking for we'll use a quick, dirty
+solution: a global variable.  Change the code to look like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">q</span> :<span class="k">call</span> QuickfixToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">function</span><span class="p">!</span> QuickfixToggle<span class="p">()</span>
+    <span class="k">if</span> <span class="k">g</span>:quickfix_is_open
+        <span class="k">cclose</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">0</span>
+    <span class="k">else</span>
+        <span class="k">copen</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">1</span>
+    <span class="k">endif</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>What we've done is pretty simple -- we're simply storing a global variable
+describing the open/closed state of the quickfix window whenever we call the
+function.</p>
+<p>Write and source the file, and try to run the mapping.  Vim will complain that
+the variable is not defined yet!  Let's fix that by initializing it once:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">q</span> :<span class="k">call</span> QuickfixToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">0</span>
+
+<span class="k">function</span><span class="p">!</span> QuickfixToggle<span class="p">()</span>
+    <span class="k">if</span> <span class="k">g</span>:quickfix_is_open
+        <span class="k">cclose</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">0</span>
+    <span class="k">else</span>
+        <span class="k">copen</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">1</span>
+    <span class="k">endif</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>Write and source the file, and try the mapping.  It works!</p>
+<h2 id="improvements">Improvements</h2>
+<p>Our toggle function works, but has a few problems.</p>
+<p>The first is that if the user manually opens or closes the window with <code>:copen</code>
+or <code>:cclose</code> our global variable doesn't get updated.  This isn't really a huge
+problem in practice because most of the time the user will probably be opening
+the window with the mapping, and if not they can always just press it again.</p>
+<p>This illustrates an important point about writing Vimscript code: if you try to
+handle every single edge case you'll get bogged down in it and never get any
+work done.</p>
+<p>Getting something that works most of the time (and doesn't explode when it
+doesn't work) and getting back to coding is usually better than spending hours
+getting it 100% perfect.  The exception is when you're writing a plugin you
+expect many people to use.  In that case it's best to spend the time and make it
+bulletproof to keep your users happy and reduce bug reports.</p>
+<h2 id="restoring-windowsbuffers">Restoring Windows/Buffers</h2>
+<p>The other problem with our function is that if the user runs the mapping when
+they're already in the quickfix window, Vim closes it and dumps them into the
+last split instead of sending them back where they were.  This is annoying if
+you just want to check the quickfix window really quick and get back to working.</p>
+<p>To solve this we'll introduce an idiom that comes in handy a lot when writing
+Vim plugins.  Edit your code to look like this:</p>
+<div class="codehilite"><pre><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">q</span> :<span class="k">call</span> QuickfixToggle<span class="p">()&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+
+<span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">0</span>
+
+<span class="k">function</span><span class="p">!</span> QuickfixToggle<span class="p">()</span>
+    <span class="k">if</span> <span class="k">g</span>:quickfix_is_open
+        <span class="k">cclose</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">0</span>
+        execute <span class="k">g</span>:quickfix_return_to_window . <span class="s2">"wincmd w"</span>
+    <span class="k">else</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_return_to_window <span class="p">=</span> winnr<span class="p">()</span>
+        <span class="k">copen</span>
+        <span class="k">let</span> <span class="k">g</span>:quickfix_is_open <span class="p">=</span> <span class="m">1</span>
+    <span class="k">endif</span>
+<span class="k">endfunction</span>
+</pre></div>
+
+
+<p>We've added two new lines in this mapping.  One of them (in the <code>else</code> clause)
+sets another global variable which saves the current window number before we run
+<code>:copen</code>.</p>
+<p>The second line (in the <code>if</code> clause) executes <code>wincmd w</code> with that number
+prepended as a count, which tells Vim to go to that window.</p>
+<p>Once again our solution isn't bulletproof, because the user might open or close
+new split between runs of the mapping.  Even so, it handles the majority of
+cases so it's good enough for now.</p>
+<p>This strategy of manually saving global state would be frowned upon in most
+serious programs, but for tiny little Vimscript functions it's a quick and dirty
+way of getting something mostly working and moving on with your life.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help foldcolumn</code>.</p>
+<p>Read <code>:help winnr()</code></p>
+<p>Read <code>:help ctrl-w_w</code>.</p>
+<p>Read <code>:help wincmd</code>.</p>
+<p>Namespace the functions by adding <code>s:</code> and <code>&lt;SID&gt;</code> where necessary.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/37.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/39.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

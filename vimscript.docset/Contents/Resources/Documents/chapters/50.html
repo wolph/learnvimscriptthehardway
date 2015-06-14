@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Section Movement Theory / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#section-movement-theory">Section Movement Theory</a><ul>
+<li><a href="#nroff-files">Nroff Files</a></li>
+<li><a href="#braces">Braces</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/49.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/51.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="section-movement-theory">Section Movement Theory</h1>
+<p>If you've never used Vim's section movement commands (<code>[[</code>, <code>]]</code>, <code>[]</code> and <code>][</code>)
+take a second and read the help for them now.  Go ahead and read <code>:help section</code>
+as well.</p>
+<p>Confused yet?  That's okay, so was I the first time I read that stuff.  We're
+going to take a quick detour from writing code to learn about how these
+movements work, and then in the next chapter we'll make our Potion plugin
+support them.</p>
+<h2 id="nroff-files">Nroff Files</h2>
+<p>The four "section movement" commands are conceptually meant to move around
+between "sections" of a file.</p>
+<p>All of these commands are designed to work with <a href="http://en.wikipedia.org/wiki/Nroff">nroff files</a> by default.
+Nroff is a language like LaTeX or Markdown -- it's used to write text that will
+be reformatted later (it's actually the format used by UNIX man pages).</p>
+<p>Nroff files use a certain set of "macros" to define "section headings".  For
+example, here's an excerpt from the <code>awk</code> man page:</p>
+<div class="codehilite"><pre>.<span class="k">SH</span> <span class="s">NAME</span>                                                     <span class="s">***</span>
+awk <span class="se">\-</span> pattern-directed scanning and processing language
+.<span class="k">SH</span> <span class="s">SYNOPSIS</span>                                                 <span class="s">***</span>
+.<span class="k">B</span> <span class="s">awk</span>
+[
+.<span class="k">BI</span> <span class="se">\-</span><span class="s">F</span>
+.<span class="k">I</span> <span class="s">fs</span>
+]
+[
+.<span class="k">BI</span> <span class="se">\-</span><span class="s">v</span>
+.<span class="k">I</span> <span class="s">var=value</span>
+]
+[
+.<span class="k">I</span> <span class="s">'prog'</span>
+|
+.<span class="k">BI</span> <span class="se">\-</span><span class="s">f</span>
+.<span class="k">I</span> <span class="s">progfile</span>
+]
+[
+.<span class="k">I</span> <span class="s">file</span> <span class="s">...</span>
+]
+.<span class="k">SH</span> <span class="s">DESCRIPTION</span>                                              <span class="s">***</span>
+.<span class="k">I</span> <span class="s">Awk</span>
+scans each input
+.<span class="k">I</span> <span class="s">file</span>
+for lines that match ...
+</pre></div>
+
+
+<p>The lines starting with <code>.SH</code> are section headings.  I've marked them with
+<code>***</code>.  The four section movement commands will move your cursor between these
+section heading lines.</p>
+<p>Vim considers any line starting with <code>.</code> and one of the nroff heading macros to
+be a section header, <em>even when you're not editing an nroff file</em>!</p>
+<p>You can change the macros by changing the <code>sections</code> setting, but Vim still
+requires a period at the beginning of the line, and the macros must be pairs of
+characters, so that setting doesn't add enough flexibility for Potion files.</p>
+<h2 id="braces">Braces</h2>
+<p>Section movement commands <em>also</em> look for one more thing: an opening or closing
+curly brace (<code>{</code> or <code>}</code>) as the first character on a line.</p>
+<p><code>[[</code> and <code>]]</code> look for opening braces, while <code>[]</code> and <code>][</code> look for closing
+braces.</p>
+<p>This extra "hack" allows you to move between sections of C-like languages
+easily.  However, these rules are always the same no matter what type of file
+you're in!</p>
+<p>Put the following into a buffer:</p>
+<div class="codehilite"><pre>Test           A B
+Test
+
+.SH Hello      A B
+
+Test
+
+{              A
+Test
+}                B
+
+Test
+
+.H World       A B
+
+Test
+Test           A B
+</pre></div>
+
+
+<p>Now run <code>:set filetype=basic</code> to tell Vim that this is a BASIC file, and try the
+section movement comments.</p>
+<p>The <code>[[</code> and <code>]]</code> commands will move between the lines marked <code>A</code>, while <code>[]</code>
+and <code>][</code> move between the lines marked <code>B</code>.</p>
+<p>This shows us that Vim always uses these same two rules for section movement,
+even for languages where neither one makes sense (like BASIC)!</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help section</code> again, now that you know the story of section movement.</p>
+<p>Read <code>:help sections</code> just for the fun of it.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/49.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/51.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

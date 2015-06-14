@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Even More Advanced Syntax Highlighting / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#even-more-advanced-syntax-highlighting">Even More Advanced Syntax Highlighting</a><ul>
+<li><a href="#highlighting-strings">Highlighting Strings</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/46.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/48.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="even-more-advanced-syntax-highlighting">Even More Advanced Syntax Highlighting</h1>
+<p>Syntax highlighting in Vim is a topic that could easily fill a book of its own.</p>
+<p>We're going to cover one last important part of it here and then move on to
+other things.  If you want to learn more you can read the Vim documentation with
+<code>:help syntax</code> and look at syntax files other people have made.</p>
+<h2 id="highlighting-strings">Highlighting Strings</h2>
+<p>Potion, like most programming languages, supports string literals like <code>"Hello,
+world!"</code>.  We should highlight these as strings.  To do this we'll use the
+<code>syntax region</code> command.  Add the following to your Potion syntax file:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> region potionString <span class="k">start</span><span class="p">=</span><span class="sr">/\v"/</span> skip<span class="p">=</span><span class="sr">/\v\\./</span> <span class="k">end</span><span class="p">=</span><span class="sr">/\v"/</span>
+<span class="nb">highlight</span> link potionString String
+</pre></div>
+
+
+<p>Close and reopen your <code>factorial.pn</code> file and you'll see that the string at the
+end of the file is highlighted!</p>
+<p>The last line here should be familiar.  Reread the previous two chapters if you
+don't understand what it does.</p>
+<p>The first line adds to a syntax group using a "region".  Regions have a "start"
+pattern and an "end" pattern that specify where they start and end.  In this
+case, a Potion string starts when we see a double quote and ends when we see the
+next double quote.</p>
+<p>The "skip" argument to <code>syntax region</code> allows us to handle string escapes like
+<code>"She said: \"Vimscript is tricky, but useful\"!"</code>.</p>
+<p>If we didn't use the <code>skip</code> argument Vim would end the string at the <code>"</code> before
+<code>Vimscript</code>, which is not what we want!</p>
+<p>In a nutshell, the <code>skip</code> argument to <code>syntax region</code> tells Vim: "once you start
+matching this region, I want you to ignore anything that matches <code>skip</code>, even if
+it would normally be considered the end of the region".</p>
+<p>Take a few minutes and think through this.  What happens with something like
+<code>"foo \\" bar"</code>?  Is that the correct behavior?  Will that <em>always</em> be the
+correct behavior?  Close this book, take a few minutes and really <em>think</em> about
+this!</p>
+<h2 id="exercises">Exercises</h2>
+<p>Add syntax highlighting for single quoted strings.</p>
+<p>Read <code>:help syn-region</code>.</p>
+<p>Reading that should take longer than reading this chapter.  Pour yourself
+a drink, you've earned it!</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/46.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/48.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

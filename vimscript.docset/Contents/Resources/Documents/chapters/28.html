@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Execute / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#execute">Execute</a><ul>
+<li><a href="#basic-execution">Basic Execution</a></li>
+<li><a href="#is-execute-dangerous">Is Execute Dangerous?</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/27.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/29.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="execute">Execute</h1>
+<p>The <code>execute</code> command is used to evaluate a string as if it were a Vimscript
+command.  We saw it in an earlier chapter, but now that we know a bit more about
+Vimscript Strings we're going to take another look.</p>
+<h2 id="basic-execution">Basic Execution</h2>
+<p>Run the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"echom 'Hello, world!'"</span>
+</pre></div>
+
+
+<p>Vim evaluates <code>echom 'Hello, world!'</code> as a command and dutifully echoes it to
+the screen and message log.  Execute is a very powerful tool because it lets you
+build commands out of arbitrary strings.</p>
+<p>Let's try a more useful example.  Prepare by opening a file in Vim, then using
+<code>:edit foo.txt</code> in the same window to open a new buffer.  Now run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>execute <span class="s2">"rightbelow vsplit "</span> . bufname<span class="p">(</span><span class="s2">"#"</span><span class="p">)</span>
+</pre></div>
+
+
+<p>Vim will open the first file in a vertical split to the right of the second
+file.  What happened here?</p>
+<p>First, Vim builds the command string by concatenating <code>"rightbelow vsplit "</code>
+with the result of the <code>bufname("#")</code> call.</p>
+<p>We'll look at the function more later, but for now just trust that it returns
+the path of the previous buffer.  You can play with it using <code>echom</code> if you want
+to see for yourself.</p>
+<p>Once <code>bufname</code> is evaluated Vim the string <code>"rightbelow vsplit bar.txt"</code>.  The
+<code>execute</code> command evaluates this as a Vimscript command which opens the split
+with the file.</p>
+<h2 id="is-execute-dangerous">Is Execute Dangerous?</h2>
+<p>In most programming languages the use of such an "eval" construct to evaluate
+strings as program code is frowned upon (to put it lightly).  Vimscript's
+<code>execute</code> command doesn't have the same stigma for two reasons.</p>
+<p>First, most Vimscript code only ever takes input from a single person: the user.
+If the user wants to input a tricky string that will cause an <code>execute</code> command
+to do something bad, well, it's their computer!  Contrast this with other
+languages, where programs constantly take input from untrusted users.  Vim is
+a unique environment where the normal security concerns simply aren't common.</p>
+<p>The second reason is that because Vimscript has sometimes arcane and tricky
+syntax, <code>execute</code> is often the easiest, most straightforward way to get
+something done.  In most other languages using an "eval" construct won't usually
+save you much typing, but in Vimscript it can collapse many lines into a single
+one.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Skim <code>:help execute</code> to get an idea of some of the things you can and can't use
+<code>execute</code> for.  Don't dive too deeply yet -- we're going to revisit it very
+soon.</p>
+<p>Read <code>:help leftabove</code>, <code>:help rightbelow</code>, <code>:help :split</code>, and <code>:help :vsplit</code>
+(notice the extra colon in the last two topics).</p>
+<p>Add a mapping to your <code>~/.vimrc</code> file that opens the previous buffer in a split
+of your choosing (vertical/horizontal, above/below/left/right).</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/27.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/29.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

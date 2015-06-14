@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Basic Syntax Highlighting / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="/static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="/static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="/static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="/static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="/"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#basic-syntax-highlighting">Basic Syntax Highlighting</a><ul>
+<li><a href="#highlighting-keywords">Highlighting Keywords</a></li>
+<li><a href="#highlighting-functions">Highlighting Functions</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/44.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="/chapters/46.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="basic-syntax-highlighting">Basic Syntax Highlighting</h1>
+<p>Now that we've gotten the boilerplate out of the way it's time to start writing
+some useful code for our Potion plugin.  We'll start with some simple syntax
+highlighting.</p>
+<p>Create a <code>syntax/potion.vim</code> file in your plugin's repo.  Put the following code
+into the file:</p>
+<div class="codehilite"><pre><span class="k">if</span> exists<span class="p">(</span><span class="s2">"b:current_syntax"</span><span class="p">)</span>
+    <span class="k">finish</span>
+<span class="k">endif</span>
+
+<span class="k">echom</span> <span class="s2">"Our syntax highlighting code will go here."</span>
+
+<span class="k">let</span> <span class="k">b</span>:current_syntax <span class="p">=</span> <span class="s2">"potion"</span>
+</pre></div>
+
+
+<p>Close Vim, and then open your <code>factorial.pn</code> file.  You may or may not see the
+message, depending on whether you have any other plugins that perform commands
+after this one gets run.  If you run <code>:messages</code> you'll definitely see that the
+file was indeed loaded.</p>
+<p><strong>Note:</strong>  Whenever I tell you to open the Potion file I want you to do it in
+a <em>new Vim window/instance</em> instead of in a split/tab.  Opening a new Vim window
+causes Vim to reload all your bundled files for that window, whereas using
+a split does not.</p>
+<p>The lines at the beginning and end of the file are a convention that prevents it
+from being loaded if syntax highlighting has already been enabled for this
+buffer.</p>
+<h2 id="highlighting-keywords">Highlighting Keywords</h2>
+<p>For the rest of this chapter we'll ignore the <code>if</code> and <code>let</code> boilerplate at the
+beginning and end of the file.  Don't remove those lines, just forget about them.</p>
+<p>Replace the placeholder <code>echom</code> in the file with the following code:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> keyword potionKeyword <span class="k">to</span> times
+<span class="nb">highlight</span> link potionKeyword Keyword
+</pre></div>
+
+
+<p>Close the <code>factorial.pn</code> file and reopen it.  The <code>to</code> and <code>times</code> words will be
+highlighted as keywords in your color scheme!</p>
+<p>These two lines show the basic structure of simple syntax highlighting in Vim.
+To highlight a piece of syntax:</p>
+<ul>
+<li>You first define a "chunk" of syntax using <code>syntax keyword</code> or a related
+  command (which we'll talk about later).</li>
+<li>You then link "chunks" to highlighting groups.  A highlighting group is
+  something you define in a color scheme, for example "function names should be
+  blue".</li>
+</ul>
+<p>This lets plugin authors define the "chunks" of syntax in ways that make sense
+to them, and then link them to common highlighting groups.  It also lets color
+scheme creators define colors for a common set of programming constructs so they
+don't need to know about individual languages.</p>
+<p>Potion has a bunch of other keywords that we haven't used in our toy program, so
+let's edit our syntax file to highlight those too:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> keyword potionKeyword loop times <span class="k">to</span> <span class="k">while</span>
+<span class="nb">syntax</span> keyword potionKeyword <span class="k">if</span> elsif <span class="k">else</span>
+<span class="nb">syntax</span> keyword potionKeyword class <span class="k">return</span>
+
+<span class="nb">highlight</span> link potionKeyword Keyword
+</pre></div>
+
+
+<p>First of all: the last line hasn't changed.  We're still telling Vim that
+anything in the <code>potionKeyword</code> syntax group should be highlighted as
+a <code>Keyword</code>.</p>
+<p>We've now got three lines, each starting with <code>syntax keyword potionKeyword</code>.
+This shows that running this command multiple times doesn't <em>reset</em> the syntax
+group -- it adds to it!  This lets you define groups piecemeal.</p>
+<p>How you define your groups is up to you:</p>
+<ul>
+<li>You might just toss everything onto one line and be done with it.</li>
+<li>You might prefer to break the lines up so they fit within 80 columns to make
+  them easier to read.</li>
+<li>You could have a separate line for each item in a group, to make diffs looks
+  nicer.</li>
+<li>You could do what I've done here and group related items together.</li>
+</ul>
+<h2 id="highlighting-functions">Highlighting Functions</h2>
+<p>Another standard Vim highlighting group is <code>Function</code>.  Let's add some of the
+built-in Potion functions to our highlighting script.  Edit the guts of your
+syntax file so it looks like this:</p>
+<div class="codehilite"><pre><span class="nb">syntax</span> keyword potionKeyword loop times <span class="k">to</span> <span class="k">while</span>
+<span class="nb">syntax</span> keyword potionKeyword <span class="k">if</span> elsif <span class="k">else</span>
+<span class="nb">syntax</span> keyword potionKeyword class <span class="k">return</span>
+
+<span class="nb">syntax</span> keyword potionFunction print <span class="k">join</span> string
+
+<span class="nb">highlight</span> link potionKeyword Keyword
+<span class="nb">highlight</span> link potionFunction Function
+</pre></div>
+
+
+<p>Close and reopen <code>factorial.pn</code> and you'll see that the built-in potion
+functions are now highlighted.</p>
+<p>This works exactly the same way as keyword highlighting.  We've defined a new
+syntax group and linked it to a different highlighting group.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Think about why the <code>if exists</code> and <code>let</code> lines at the beginning and end of the
+file are useful.  If you can't figure it out, don't worry about it.  I had to
+ask Tim Pope to be sure.</p>
+<p>Skim over <code>:help syn-keyword</code>.  Pay close attention to the part that mentions
+<code>iskeyword</code>.</p>
+<p>Read <code>:help iskeyword</code>.</p>
+<p>Read <code>:help group-name</code> to get an idea of some common highlighting groups that
+color scheme authors frequently use.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="/chapters/44.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="/chapters/46.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="/license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

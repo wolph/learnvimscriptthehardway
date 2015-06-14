@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Echoing Messages / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#echoing-messages">Echoing Messages</a><ul>
+<li><a href="#persistent-echoing">Persistent Echoing</a></li>
+<li><a href="#comments">Comments</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/00.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/02.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="echoing-messages">Echoing Messages</h1>
+<p>The first pieces of Vimscript we'll look at are the <code>echo</code> and <code>echom</code> commands.</p>
+<p>You can read their full documentation by running <code>:help echo</code> and <code>:help echom</code>
+in Vim.  As you go through this book you should try to read the <code>:help</code> for
+every new command you encounter to learn more about them.</p>
+<p>Try out <code>echo</code> by running the following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>echo <span class="s2">"Hello, world!"</span>
+</pre></div>
+
+
+<p>You should see <code>Hello, world!</code> appear at the bottom of the window.</p>
+<h2 id="persistent-echoing">Persistent Echoing</h2>
+<p>Now try out <code>echom</code> by running the following command.</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">echom</span> <span class="s2">"Hello again, world!"</span>
+</pre></div>
+
+
+<p>You should see <code>Hello again, world!</code> appear at the bottom of the window.</p>
+<p>To see the difference between these two commands, run the following:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">messages</span>
+</pre></div>
+
+
+<p>You should see a list of messages.  <code>Hello, world!</code> will <em>not</em> be in this list,
+but <code>Hello again, world!</code> <em>will</em> be in it.</p>
+<p>When you're writing more complicated Vimscript later in this book you may find
+yourself wanting to "print some output" to help you debug problems.  Plain old
+<code>:echo</code> will print output, but it will often disappear by the time your script
+is done.  Using <code>:echom</code> will save the output and let you run <code>:messages</code> to
+view it later.</p>
+<h2 id="comments">Comments</h2>
+<p>Before moving on, let's look at how to add comments.  When you write Vimscript
+code (in your <code>~/.vimrc</code> file or any other one) you can add comments with the
+<code>"</code> character, like this:</p>
+<div class="codehilite"><pre><span class="c">" Make space more useful</span>
+<span class="nb">nnoremap</span> <span class="p">&lt;</span>space<span class="p">&gt;</span> za
+</pre></div>
+
+
+<p>This doesn't <em>always</em> work (that's one of those ugly corners of Vimscript), but
+in most cases it does.  Later we'll talk about when it won't (and why that
+happens).</p>
+<h2 id="exercises">Exercises</h2>
+<p>Read <code>:help echo</code>.</p>
+<p>Read <code>:help echom</code>.</p>
+<p>Read <code>:help messages</code>.</p>
+<p>Add a line to your <code>~/.vimrc</code> file that displays a friendly ASCII-art cat
+(<code>&gt;^.^&lt;</code>) whenever you open Vim.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/00.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/02.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

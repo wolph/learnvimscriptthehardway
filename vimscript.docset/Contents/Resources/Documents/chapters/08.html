@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Abbreviations / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#abbreviations">Abbreviations</a><ul>
+<li><a href="#keyword-characters">Keyword Characters</a></li>
+<li><a href="#more-abbreviations">More Abbreviations</a></li>
+<li><a href="#why-not-use-mappings">Why Not Use Mappings?</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/07.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/09.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="abbreviations">Abbreviations</h1>
+<p>Vim has a feature called "abbreviations" that feel similar to mappings but are
+meant for use in insert, replace, and command modes.  They're extremely flexible
+and powerful, but we're just going to cover the most common uses here.</p>
+<p>We're only going to worry about insert mode abbreviations in this book. Run the
+following command:</p>
+<div class="codehilite"><pre><span class="p">:</span>iabbrev adn and
+</pre></div>
+
+
+<p>Now enter insert mode and type:</p>
+<div class="codehilite"><pre>One adn two.
+</pre></div>
+
+
+<p>As soon as you hit space after typing the <code>adn</code> Vim will replace it with <code>and</code>.</p>
+<p>Correcting typos like this is a great use for abbreviations.  Run these
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>iabbrev waht what
+<span class="p">:</span>iabbrev tehn then
+</pre></div>
+
+
+<p>Now enter insert mode again and type:</p>
+<div class="codehilite"><pre>Well, I don't know waht we should do tehn.
+</pre></div>
+
+
+<p>Notice how <em>both</em> abbreviations were substituted, even though you didn't type
+a space after the second one.</p>
+<h2 id="keyword-characters">Keyword Characters</h2>
+<p>Vim will substitute an abbreviation when you type any "non-keyword character"
+after an abbreviation.  "Non-keyword character" means any character not in the
+<code>iskeyword</code> option.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="k">set</span> <span class="nb">iskeyword</span>?
+</pre></div>
+
+
+<p>You should see something like <code>iskeyword=@,48-57,_,192-255</code>.  This format is
+very complicated, but in essence it means that all of the following are
+considered "keyword characters":</p>
+<ul>
+<li>The underscore character (<code>_</code>).</li>
+<li>All alphabetic ASCII characters, both upper and lower case, and their accented
+  versions.</li>
+<li>Any characters with an ASCII value between 48 and 57 (the digits zero through
+  nine).</li>
+<li>Any characters with an ASCII value between 192 and 255 (some special ASCII
+  characters).</li>
+</ul>
+<p>If you want to read the <em>full</em> description of this option's format you can check
+out <code>:help isfname</code>, but I'll warn you that you'd better have a beer at the
+ready for this one.</p>
+<p>For our purposes you can simply remember that abbreviations will be expanded
+when you type anything that's not a letter, number, or underscore.</p>
+<h2 id="more-abbreviations">More Abbreviations</h2>
+<p>Abbreviations are useful for more than just correcting typos.  Let's add a few
+more that can help in day-to-day text editing.  Run the following commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>iabbrev @@    steve@stevelosh.<span class="k">com</span>
+<span class="p">:</span>iabbrev ccopy Copyright <span class="m">2013</span> Steve Losh<span class="p">,</span> <span class="k">all</span> rights reserved.
+</pre></div>
+
+
+<p>Feel free to replace my name and email address with your own, then enter insert
+mode and try them out.</p>
+<p>These abbreviations take large chunks of text that you type often and compress
+them down to a few characters.  Over time, this can save you a lot of typing, as
+well as wear and tear on your fingers.</p>
+<h2 id="why-not-use-mappings">Why Not Use Mappings?</h2>
+<p>If you're thinking that abbreviations seem similar to mappings, you're right.
+However, they're intended to be used for different things.  Let's look at an
+example.</p>
+<p>Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">inoremap</span> ssig <span class="p">--</span> <span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>Steve Losh<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>steve@stevelosh.<span class="k">com</span>
+</pre></div>
+
+
+<p>This is a <em>mapping</em> intended to let you insert your signature quickly.  Try it
+out by entering insert mode and typing <code>ssig</code>.</p>
+<p>It seems to work great, but there's a problem.  Try entering insert mode and
+typing this text:</p>
+<div class="codehilite"><pre>Larry Lessig wrote the book "Remix".
+</pre></div>
+
+
+<p>You'll notice that Vim has expanded the <code>ssig</code> in Larry's name!  Mappings don't
+take into account what characters come before or after the map -- they only look
+at the specific sequence that you mapped to.</p>
+<p>Remove the mapping and replace it with an abbreviation by running the following
+commands:</p>
+<div class="codehilite"><pre><span class="p">:</span>iunmap ssig
+<span class="p">:</span>iabbrev ssig <span class="p">--</span> <span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>Steve Losh<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>steve@stevelosh.<span class="k">com</span>
+</pre></div>
+
+
+<p>Now try out the abbreviation again.</p>
+<p>This time Vim will pay attention to the characters before and after <code>ssig</code> and
+only expand it when we want.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Add abbreviations for some common typos you know you personally make to your
+<code>~/.vimrc</code> file.  Be sure to use the mappings you created in the last chapter to
+open and source the file!</p>
+<p>Add abbreviations for your own email address, website, and signature as well.</p>
+<p>Think of some pieces of text you type very often and add abbreviations for them
+too.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/07.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/09.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>

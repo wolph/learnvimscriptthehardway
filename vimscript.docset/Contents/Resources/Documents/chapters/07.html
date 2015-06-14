@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+
+<!--[if lt IE 7 ]><html class="ie ie6" lang="en"> <![endif]-->
+<!--[if IE 7 ]><html class="ie ie7" lang="en"> <![endif]-->
+<!--[if IE 8 ]><html class="ie ie8" lang="en"> <![endif]-->
+<!--[if (gte IE 9)|!(IE)]><!--><html lang="en"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <title>Editing Your Vimrc / Learn Vimscript the Hard Way</title>
+        <meta name="description" content="">
+        <meta name="author" content="Steve Losh">
+        <!--[if lt IE 9]>
+            <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
+        <![endif]-->
+
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+        <link href="../static/styles/skeleton/base.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/skeleton.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/skeleton/layout.css" rel="stylesheet" type="text/css" />
+
+        <link href="../static/styles/tango.css" rel="stylesheet" type="text/css" />
+        <link href="../static/styles/style.less" rel="stylesheet/less" type="text/css" />
+
+        <script type="text/javascript" src="../static/scripts/less.js"></script>
+    </head>
+
+    <body class="">
+        <div class="container">
+            <header class="sixteen columns">
+                <h1><a href="../"></a></h1>
+            </header>
+
+            
+    <section class="nav three columns">
+        
+<ul>
+<li><a href="#editing-your-vimrc">Editing Your Vimrc</a><ul>
+<li><a href="#editing-mapping">Editing Mapping</a></li>
+<li><a href="#sourcing-mapping">Sourcing Mapping</a></li>
+<li><a href="#exercises">Exercises</a></li>
+</ul>
+</li>
+</ul>
+
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/06.html">&laquo; Prev</a>
+            
+            
+                <a class="next" href="../chapters/08.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+    <section class="content twelve columns offset-by-one">
+        <div> 
+<h1 id="editing-your-vimrc">Editing Your Vimrc</h1>
+<p>Before we move on to learning more Vimscript, let's find a way to make it easier
+to add new mappings to our <code>~/.vimrc</code> file.</p>
+<p>Sometimes you're coding away furiously at a problem and realize a new mapping
+would make your editing easier.  You should add it to your <code>~/.vimrc</code> file right
+then and there to make sure you don't forget, but you <em>don't</em> want to lose your
+concentration.</p>
+<p>The idea of this chapter is that you want to make it easier to make it easier to
+edit text.</p>
+<p>That's not a typo.  Read it again.</p>
+<p>The idea of this chapter is that you want to (make it easier to (make it easier
+to (edit text))).</p>
+<h2 id="editing-mapping">Editing Mapping</h2>
+<p>Let's add a mapping that will open your <code>~/.vimrc</code> file in a split so you can
+quickly edit it and get back to coding.  Run this command:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span>ev :<span class="k">vsplit</span> $MYVIMRC<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>I like to think of this command as "<strong>e</strong>dit my <strong>v</strong>imrc file".</p>
+<p><code>$MYVIMRC</code> is a special Vim variable that points to your <code>~/.vimrc</code> file.  Don't
+worry about that for right now, just trust me that it works.</p>
+<p><code>:vsplit</code> opens a new vertical split.  If you'd prefer a horizontal split you
+can replace it with <code>:split</code>.</p>
+<p>Take a minute and think through that command in your mind.  The goal is: "open
+my <code>~/.vimrc</code> file in a new split".  Why does it work?  Why is every single
+piece of that mapping necessary?</p>
+<p>With that mapping you can open up your <code>~/.vimrc</code> file with three keystrokes.
+Once you use it a few times it will burn its way into your muscle memory and
+take less than half a second to type.</p>
+<p>When you're in the middle of coding and come up with a new mapping that would
+save you time it's now trivial to add it to your <code>~/.vimrc</code> file.</p>
+<h2 id="sourcing-mapping">Sourcing Mapping</h2>
+<p>Once you've added a mapping to your <code>~/.vimrc</code> file, it doesn't immediately take
+effect.  Your <code>~/.vimrc</code> file is only read when you start Vim.  This means you
+need to also run the command manually to make it work in the current session,
+which is a pain.</p>
+<p>Let's add a mapping to make this easier:</p>
+<div class="codehilite"><pre><span class="p">:</span><span class="nb">nnoremap</span> <span class="p">&lt;</span>leader<span class="p">&gt;</span><span class="k">sv</span> :source $MYVIMRC<span class="p">&lt;</span><span class="k">cr</span><span class="p">&gt;</span>
+</pre></div>
+
+
+<p>I like to think of this command as "<strong>s</strong>ource my <strong>v</strong>imrc file".</p>
+<p>The <code>source</code> command tells Vim to take the contents of the given file and
+execute it as Vimscript.</p>
+<p>Now you can easily add new mappings during the heat of coding:</p>
+<ul>
+<li>Use <code>&lt;leader&gt;ev</code> to open the file.</li>
+<li>Add the mapping.</li>
+<li>Use <code>:wq&lt;cr&gt;</code> (or <code>ZZ</code>) to write the file and close the split, bringing you
+  back to where you were.</li>
+<li>Use <code>&lt;leader&gt;sv</code> to source the file and make our changes take effect.</li>
+</ul>
+<p>That's eight keystrokes plus whatever it takes to define the mapping.  It's very
+little overhead, which reduces the chance of breaking focus.</p>
+<h2 id="exercises">Exercises</h2>
+<p>Add mappings to "edit my <code>~/.vimrc</code>" and "source my <code>~/.vimrc</code>" to your
+<code>~/.vimrc</code> file.</p>
+<p>Try them out a few times, adding dummy mappings each time.</p>
+<p>Read <code>:help myvimrc</code>.</p></div>
+
+        <div class="prevnext">
+            
+                <a class="prev" href="../chapters/06.html">&laquo; Previous</a>
+            
+            
+                <a class="next" href="../chapters/08.html">Next &raquo;</a>
+            
+        </div>
+    </section>
+
+
+            <footer class="sixteen columns">
+                Made by <a href=""></a>.
+
+                <a href="../license.html">License</a>.
+
+                Built with
+                <a href="http://bitbucket.org/sjl/bookmarkdown/">Bookmarkdown</a>.
+            </footer>
+        </div>
+
+        
+
+        
+    </body>
+</html>
