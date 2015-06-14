@@ -75,6 +75,7 @@ python -c 'import pyquery' || error 'Please install pyquery, You can try:' \
 cd learnvimscriptthehardway
 echo 'Building learnvimscriptthehardway'
 . ./build.sh
+REVISION=$(git rev-parse HEAD)
 
 cd "$BASE_DIR"
 
@@ -118,3 +119,9 @@ cd "$BASE_DIR"
 echo "Packaging"
 tar --exclude='.DS_Store' -cvzf vimscript.tgz vimscript.docset
 
+echo "
+<entry>
+    <version>$REVISION</version>
+    <url>https://github.com/wolph/learnvimscriptthehardway/raw/master/vimscript.tgz</url>
+</entry>
+" > learnvimscriptthehardway.xml
